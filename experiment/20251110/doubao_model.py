@@ -141,7 +141,6 @@ class DegradationAwarePerturbationModule(nn.Module):
         feat_perturbed = feat + 0.1 * feat_spat  # 0.1为扰动强度系数（可微调）
         
         return feat_perturbed, perturb_reg
-    
 
 class DegradationAwareReconstructionHead(nn.Module):
     """
@@ -224,7 +223,6 @@ class DegradationAwareReconstructionHead(nn.Module):
         recon_img = torch.clamp(recon_img, 0.0, 1.0)
         
         return recon_img
-
 
 class DARestormer(nn.Module):
     """Degradation-Aware Restormer 完整模型"""
