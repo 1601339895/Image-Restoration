@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import init
+from fvcore.nn import FlopCountAnalysis, flop_count_table
 
 
 class SimpleGate(nn.Module):
@@ -284,13 +285,25 @@ class FBlock(nn.Module):
     结构参考：论文图3(a)中FBlock模块
     设计思路：层级间递归融合，每级DI与下一级融合后的DI_hat加权拼接
     """
-    def __init__(self, channel):
+    def __init__(self, channels):
+        """
+        参数：
+            channels: 各级DI的通道数列表，如[128, 256, 512, 1024, 1024]
+        """
         super().__init__()
-        self.channel = channel
-        # 可学习权重W（论文中W通过反向传播优化，初始为1）
-        self.W = nn.Parameter(torch.ones(1, channel, 1, 1), requires_grad=True)
-        # 1x1卷积：调整拼接后的通道数（DI_l + W*DI_hat_l → channel）
-        self.conv_fuse = nn.Conv2d(channel * 2, channel, kernel_size=1, padding=0)
+        self.channels = channels
+        # 为每一级创建独立的权重W和融合卷积
+        self.W_list = nn.ParameterList()
+        self.conv_fuse_list = nn.ModuleList()
+
+        # 从深层到浅层，每一级都需要一个融合模块
+        for i in range(len(channels) - 1):
+            # 当前级的通道数
+            ch = channels[-(i+2)]  # 倒数第i+2个（从倒数第2个开始）
+            # 可学习权重W（初始为1）
+            self.W_list.append(nn.Parameter(torch.ones(1, ch, 1, 1), requires_grad=True))
+            # 1x1卷积：调整拼接后的通道数（DI_l + W*DI_hat_l → channel）
+            self.conv_fuse_list.append(nn.Conv2d(ch * 2, ch, kernel_size=1, padding=0))
 
     def forward(self, di_list):
         """
@@ -303,16 +316,29 @@ class FBlock(nn.Module):
         # 从最深层（中间块）开始递归融合（论文中层级从深到浅）
         di_hat_prev = di_list[-1]  # 初始值：中间块的DI
         di_hat_list.append(di_hat_prev)
-        
+
         # 反向遍历编码器层级（从第4级→第1级）
-        for di in reversed(di_list[:-1]):
+        for idx, di in enumerate(reversed(di_list[:-1])):
             # 论文公式(6)：DI_hat_{l-1} = DI_l ⊕ W * DI_hat_l
-            weighted_di_hat = di_hat_prev * self.W  # W * DI_hat_l
+            # 先将di_hat_prev下采样或上采样到与di相同的通道数
+            di_hat_prev_resized = F.interpolate(di_hat_prev, size=di.shape[2:], mode='bilinear', align_corners=True)
+
+            # 调整通道数以匹配当前级
+            if di_hat_prev_resized.shape[1] != di.shape[1]:
+                # 使用1x1卷积调整通道数
+                if not hasattr(self, f'channel_adapter_{idx}'):
+                    adapter = nn.Conv2d(di_hat_prev_resized.shape[1], di.shape[1], kernel_size=1).to(di.device)
+                    setattr(self, f'channel_adapter_{idx}', adapter)
+                else:
+                    adapter = getattr(self, f'channel_adapter_{idx}')
+                di_hat_prev_resized = adapter(di_hat_prev_resized)
+
+            weighted_di_hat = di_hat_prev_resized * self.W_list[idx]  # W * DI_hat_l
             fused = torch.cat([di, weighted_di_hat], dim=1)  # DI_l ⊕ 加权DI_hat
-            di_hat_curr = self.conv_fuse(fused)  # 融合后调整通道数
+            di_hat_curr = self.conv_fuse_list[idx](fused)  # 融合后调整通道数
             di_hat_list.append(di_hat_curr)
             di_hat_prev = di_hat_curr
-        
+
         # 调整顺序为[DI_hat_1, DI_hat_2, DI_hat_3, DI_hat_4, DI_hat_mid]
         di_hat_list = di_hat_list[::-1]
         return di_hat_list
@@ -337,15 +363,17 @@ class TABlock(nn.Module):
         self.tau = tau  # 稀疏激活阈值
         
         # Step 1: 预处理模块（LN + 1x1卷积 + 深度卷积 + SG）
+        # 注意：输入D_hat是D_up和CF_l拼接后的特征，通道数为in_channel
+        self.ln = nn.LayerNorm(in_channel)  # LN(D_hat_{l-1})
         self.preprocess = nn.Sequential(
-            nn.LayerNorm(in_channel),  # LN(D_hat_{l-1})
             nn.Conv2d(in_channel, in_channel, kernel_size=1, padding=0),  # f_1x1^c
             nn.Conv2d(in_channel, in_channel, kernel_size=3, padding=1, groups=in_channel),  # f_3x3^dwc（深度卷积）
             SimpleGate()  # SG(·)
         )
         
         # Step 2: 拼接DI_hat后调整通道数（匹配SCA输入）
-        self.conv_after_concat = nn.Conv2d(in_channel * 2, in_channel, kernel_size=1, padding=0)
+        # 修复：SG会将通道数减半，所以concat后通道数为 in_channel//2 + in_channel
+        self.conv_after_concat = nn.Conv2d(in_channel//2 + in_channel, in_channel, kernel_size=1, padding=0)
         
         # Step 3: 简化通道注意力（SCA）
         self.sca = SimplifiedChannelAttention(channel=in_channel)
@@ -375,12 +403,26 @@ class TABlock(nn.Module):
         """
         输入：
             D_hat: 解码器上一级输出与跳跃连接CF的融合特征，shape=(B, in_channel, H, W)
-            DI_hat: FBlock融合后的退化表征，shape=(B, in_channel, H, W)
+            DI_hat: FBlock融合后的退化表征，shape=(B, *, H, W) - 通道数可能与D_hat不同
         输出：
             DX_final: 动态融合后的恢复特征，shape=(B, out_channel, H, W)
         """
+        # Step 0: 调整DI_hat的通道数和空间尺寸以匹配D_hat
+        if DI_hat.shape[1] != self.in_channel or DI_hat.shape[2:] != D_hat.shape[2:]:
+            # 先调整空间尺寸
+            if DI_hat.shape[2:] != D_hat.shape[2:]:
+                DI_hat = F.interpolate(DI_hat, size=D_hat.shape[2:], mode='bilinear', align_corners=True)
+            # 再调整通道数
+            if DI_hat.shape[1] != self.in_channel:
+                if not hasattr(self, 'di_hat_adapter'):
+                    self.di_hat_adapter = nn.Conv2d(DI_hat.shape[1], self.in_channel, kernel_size=1).to(D_hat.device)
+                DI_hat = self.di_hat_adapter(DI_hat)
+
         # Step 1: 预处理D_hat（LN + 1x1 + 深度卷积 + SG）
-        D_hat_pre = self.preprocess(D_hat.permute(0,2,3,1)).permute(0,3,1,2)  # 适配LayerNorm维度
+        # 先应用LayerNorm（需要permute维度）
+        D_hat_ln = self.ln(D_hat.permute(0,2,3,1)).permute(0,3,1,2)  # 适配LayerNorm维度
+        # 再应用卷积序列
+        D_hat_pre = self.preprocess(D_hat_ln)
         
         # Step 2: 拼接D_hat_pre与DI_hat，调整通道数
         concat_dc = torch.cat([D_hat_pre, DI_hat], dim=1)  # D_hat_pre ⊕ DI_hat
@@ -447,20 +489,22 @@ class IMDNet(nn.Module):
         self.shallow_conv = nn.Conv2d(in_channels, base_channel, kernel_size=3, padding=1)
         
         # -------------------------- 2. 低分辨率图像Convs模块 --------------------------
-        # 功能：对原图像下采样4个尺度，生成I_l_convs（对应编码器4级）
+        # 功能：对原图像下采样5个尺度，生成I_l_convs（对应编码器4级+中间块）
         self.lr_convs = nn.ModuleList()
-        for i in range(4):  # 4个尺度（1/1, 1/2, 1/4, 1/8）
+        for i in range(5):  # 5个尺度（1/1, 1/2, 1/4, 1/8, 1/16）
             down_scale = 2 ** i
+            # 最后一个尺度（1/16）用于中间块，通道数为16*base_channel
+            out_ch = base_channel * (2 ** min(i, 4))
             self.lr_convs.append(
                 nn.Sequential(
                     # 下采样：双线性插值
                     nn.Upsample(scale_factor=1/down_scale, mode='bilinear', align_corners=True),
                     # Convs模块：2层3x3卷积 + 1x1通道调整（匹配编码器输入通道）
-                    nn.Conv2d(in_channels, base_channel * (2 ** i), kernel_size=3, padding=1),
+                    nn.Conv2d(in_channels, out_ch, kernel_size=3, padding=1),
                     nn.ReLU(inplace=True),
-                    nn.Conv2d(base_channel * (2 ** i), base_channel * (2 ** i), kernel_size=3, padding=1),
+                    nn.Conv2d(out_ch, out_ch, kernel_size=3, padding=1),
                     nn.ReLU(inplace=True),
-                    nn.Conv2d(base_channel * (2 ** i), base_channel * (2 ** i), kernel_size=1, padding=0)
+                    nn.Conv2d(out_ch, out_ch, kernel_size=1, padding=0)
                 )
             )
         
@@ -469,24 +513,28 @@ class IMDNet(nn.Module):
         self.encoder_did_nums = encoder_did_nums
         # 4级编码器，通道数：base_channel → 2*base_channel → 4*base_channel → 8*base_channel
         for l in range(4):
-            in_ch = base_channel * (2 ** l) if l == 0 else base_channel * (2 ** (l))
+            in_ch = base_channel * (2 ** l)
             out_ch = base_channel * (2 ** (l + 1))
             # 每级包含encoder_did_nums[l]个DIDBlock
             did_blocks = nn.ModuleList()
-            for _ in range(encoder_did_nums[l]):
-                did_blocks.append(DIDBlock(in_channel=in_ch, out_channel=out_ch))
+            for i in range(encoder_did_nums[l]):
+                # 第一个DIDBlock的输入通道为in_ch，后续DIDBlock的输入通道为out_ch
+                block_in_ch = in_ch if i == 0 else out_ch
+                did_blocks.append(DIDBlock(in_channel=block_in_ch, out_channel=out_ch))
             # 下采样模块（每级编码器末尾，降低分辨率）
             downsample = nn.Conv2d(out_ch, out_ch, kernel_size=2, stride=2)  # stride=2下采样
             self.encoder.append(nn.ModuleDict({'did_blocks': did_blocks, 'downsample': downsample}))
         
         # -------------------------- 4. 中间块（Middle Block） --------------------------
         self.mid_block = nn.ModuleList()
-        mid_in_ch = base_channel * (2 ** 4)  # 编码器最后一级输出通道：8*base_channel
+        mid_in_ch = base_channel * (2 ** 4)  # 编码器最后一级输出通道：16*base_channel=1024
         for _ in range(mid_did_num):
             self.mid_block.append(DIDBlock(in_channel=mid_in_ch, out_channel=mid_in_ch))
         
         # -------------------------- 5. 融合块（FBlock） --------------------------
-        self.fblock = FBlock(channel=mid_in_ch)  # 输入DI的通道数=中间块通道数
+        # 各级DI的通道数：[128, 256, 512, 1024, 1024]
+        di_channels = [base_channel * (2 ** (l+1)) for l in range(4)] + [mid_in_ch]
+        self.fblock = FBlock(channels=di_channels)
         
         # -------------------------- 6. 解码器（Decoder） --------------------------
         self.decoder = nn.ModuleList()
@@ -498,9 +546,14 @@ class IMDNet(nn.Module):
             # 上采样模块（每级解码器开头，恢复分辨率，匹配跳跃连接CF）
             upsample = nn.ConvTranspose2d(in_ch, out_ch, kernel_size=2, stride=2)  # stride=2上采样
             # 每级包含decoder_tab_nums[l]个TABlock
+            # CF来自对应的编码器级别（decoder level l 对应 encoder level 3-l）
+            cf_ch = base_channel * (2 ** (4 - l))  # encoder level (3-l) 的输出通道
+            tab_in_ch = out_ch + cf_ch  # D_up(out_ch) + CF_l(cf_ch)
             tab_blocks = nn.ModuleList()
-            for _ in range(decoder_tab_nums[l]):
-                tab_blocks.append(TABlock(in_channel=out_ch * 2, out_channel=out_ch))  # in_ch=out_ch(CF)+out_ch(上采样)
+            for i in range(decoder_tab_nums[l]):
+                # 第一个TABlock输入是D_up+CF_l，后续TABlock输入是前一个TABlock的输出
+                block_in_ch = tab_in_ch if i == 0 else out_ch
+                tab_blocks.append(TABlock(in_channel=block_in_ch, out_channel=out_ch))
             self.decoder.append(nn.ModuleDict({'upsample': upsample, 'tab_blocks': tab_blocks}))
         
         # -------------------------- 7. 残差生成与输出 --------------------------
@@ -521,15 +574,16 @@ class IMDNet(nn.Module):
         
         # -------------------------- Step 2: 处理低分辨率图像（生成I_l_convs） --------------------------
         lr_convs_feats = []
-        for l in range(4):
+        for l in range(5):  # 5个尺度：4个编码器级别 + 1个中间块
             # 生成第l级编码器对应的低分辨率特征I_l_convs
             lr_feat = self.lr_convs[l](I)
             # 调整尺寸与当前编码器特征匹配（避免下采样后尺寸不匹配）
             target_hw = (H // (2 ** l), W // (2 ** l))
             lr_feat = F.interpolate(lr_feat, size=target_hw, mode='bilinear', align_corners=True)
-            lr_convs_feats.append(lr_feat) 
+            lr_convs_feats.append(lr_feat)
         # lr_convs_feats[0].shape=torch.Size([2, 64, 256, 256]), lr_convs_feats[1].shape=torch.Size([2, 128, 128, 128])
         # lr_convs_feats[2].shape=torch.Size([2, 256, 64, 64]),  lr_convs_feats[3].shape=torch.Size([2, 512, 32, 32])
+        # lr_convs_feats[4].shape=torch.Size([2, 1024, 16, 16]) # 中间块
         
         # -------------------------- Step 3: 编码器前向（输出E、DI、CF列表） --------------------------
         encoder_E = [F0]  # 编码器输入特征列表：E_0=F0, E_1, E_2, E_3, E_4(中间块输出)
@@ -542,16 +596,20 @@ class IMDNet(nn.Module):
             I_l_convs = lr_convs_feats[l]
             did_blocks = self.encoder[l]['did_blocks']
             downsample = self.encoder[l]['downsample']
-            
+
             # 该级所有DIDBlock前向（取最后一个DIDBlock的输出作为该级结果）
             E_l, DI_l, CF_l = None, None, None
-            for did_block in did_blocks:
-                E_l, DI_l, CF_l = did_block(E_prev, I_l_convs)
-                E_prev = E_l  # 更新E_prev为当前DIDBlock输出
-            
+            for i, did_block in enumerate(did_blocks):
+                # 第一个DIDBlock使用I_l_convs，后续DIDBlock使用E_l（避免通道不匹配）
+                if i == 0:
+                    E_l, DI_l, CF_l = did_block(E_prev, I_l_convs)
+                else:
+                    # 后续DIDBlock：E_prev和I_l_convs都使用E_l（通道数匹配）
+                    E_l, DI_l, CF_l = did_block(E_l, E_l)
+
             # 下采样（用于下一级编码器输入）
             E_down = downsample(E_l)
-            
+
             # 保存该级结果
             encoder_E.append(E_down)
             encoder_DI.append(DI_l)
@@ -560,8 +618,11 @@ class IMDNet(nn.Module):
         # 中间块前向（8个DIDBlock）
         mid_E = encoder_E[-1]
         mid_DI, mid_CF = None, None
-        for did_block in self.mid_block:
-            mid_E, mid_DI, mid_CF = did_block(mid_E, I_l_convs=lr_convs_feats[-1])  # 用最后一级低分辨率特征
+        for i, did_block in enumerate(self.mid_block):
+            if i == 0:
+                mid_E, mid_DI, mid_CF = did_block(mid_E, I_l_convs=lr_convs_feats[-1])  # 用最后一级低分辨率特征
+            else:
+                mid_E, mid_DI, mid_CF = did_block(mid_E, I_l_convs=mid_E)  # 后续使用mid_E
         
         # 补充中间块结果到列表
         encoder_E.append(mid_E)
@@ -587,15 +648,18 @@ class IMDNet(nn.Module):
             D_up = upsample(D_prev)
             # 调整尺寸与CF_l完全一致
             D_up = F.interpolate(D_up, size=CF_l.shape[2:], mode='bilinear', align_corners=True)
-            
-            # Step 5.2: 融合上采样特征与CF（跳跃连接）
-            D_fuse = torch.cat([D_up, CF_l], dim=1)  # (B, 2*out_ch, H_l, W_l)
-            
-            # Step 5.3: 该级所有TABlock前向
-            D_curr = D_fuse
-            for tab_block in tab_blocks:
-                D_curr = tab_block(D_hat=D_curr, DI_hat=DI_hat_l)
-            
+
+            # Step 5.2: 第一个TABlock使用CF融合，后续TABlock直接处理
+            D_curr = None
+            for i, tab_block in enumerate(tab_blocks):
+                if i == 0:
+                    # 第一个TABlock：融合上采样特征与CF（跳跃连接）
+                    D_fuse = torch.cat([D_up, CF_l], dim=1)  # (B, 2*out_ch, H_l, W_l)
+                    D_curr = tab_block(D_hat=D_fuse, DI_hat=DI_hat_l)
+                else:
+                    # 后续TABlock：直接处理前一个TABlock的输出
+                    D_curr = tab_block(D_hat=D_curr, DI_hat=DI_hat_l)
+
             # 保存该级结果
             decoder_D.append(D_curr)
         
@@ -618,8 +682,8 @@ if __name__ == "__main__":
         encoder_did_nums=[4,4,4,8],  # 论文3.1节：编码器每级DIDBlock数量
         mid_did_num=8,                # 论文3.1节：中间块DIDBlock数量
         decoder_tab_nums=[2,2,2,2],  # 论文3.1节：解码器每级TABlock数量
-        base_channel=64               # 基础通道数（论文未明确，取常用值64）
-    )
+        base_channel=48               # 基础通道数（论文未明确，取常用值64）
+    ).cuda()
     
     # 初始化权重（论文未指定，采用默认初始化）
     def init_weights(m):
@@ -634,12 +698,23 @@ if __name__ == "__main__":
     
     # -------------------------- 测试前向流程 --------------------------
     # 模拟退化图像输入（Batch=2, Channel=3, Height=256, Width=256）
-    degraded_image = torch.randn(2, 3, 256, 256)
-    # 前向传播
-    restored_image, residual = imdnet(degraded_image)
+    # degraded_image = torch.randn(2, 3, 256, 256)
+    # # 前向传播
+    # restored_image, residual = imdnet(degraded_image)
     
-    # 输出尺寸验证
-    print(f"退化图像尺寸: {degraded_image.shape}")
-    print(f"恢复图像尺寸: {restored_image.shape}")
-    print(f"残差图像尺寸: {residual.shape}")
-    print("前向流程验证通过！")
+    # # 输出尺寸验证
+    # print(f"退化图像尺寸: {degraded_image.shape}")
+    # print(f"恢复图像尺寸: {restored_image.shape}")
+    # print(f"残差图像尺寸: {residual.shape}")
+    # print("前向流程验证通过！")
+
+
+    x = torch.randn(1, 3, 224, 224).cuda()
+    restored_image, residual = imdnet(x)
+    # Memory usage
+    print('{:>16s} : {:<.3f} [M]'.format('Max Memery',
+                                         torch.cuda.max_memory_allocated(torch.cuda.current_device()) / 1024 ** 2))
+    
+    # FLOPS and PARAMS
+    flops = FlopCountAnalysis(imdnet, (x))
+    print(flop_count_table(flops))
