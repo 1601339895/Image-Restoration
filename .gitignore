@@ -7,3 +7,5 @@
 
 # 如果你确定完全不需要任何 .vscode 配置，也可以直接忽略整个目录：
 .vscode/
+.claude/
+.idea/
