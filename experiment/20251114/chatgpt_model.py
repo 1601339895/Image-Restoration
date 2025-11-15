@@ -14,7 +14,6 @@ Notes:
 - The conditional diffusion is OUT OF SCOPE to implement end-to-end here (extremely heavy). A hook is provided to attach a diffusion/refinement module.
 - For true production and best SOTA you would swap some modules (e.g., pretrained VGG for perceptual loss, full diffusion model). This code is ready to run and debug on a single GPU.
 
-Author: ChatGPT (GPT-5 Thinking mini) — prototype code for the user to iterate on.
 """
 
 import math
@@ -49,7 +48,6 @@ class ResidualBlock(nn.Module):
         out = self.conv1(x)
         out = self.conv2(out)
         return self.act(out + x)
-
 
 # --------------------------- DIDBlock++ ---------------------------
 

@@ -1,0 +1,241 @@
+# DDP_D2R_Restormer Network Architecture Visualization
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         DDP_D2R_Restormer Architecture                      │
+│                              (dim=48 as example)                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                          INPUT: (B, 3, H, W)
+                                  │
+                                  ▼
+                    ┌─────────────────────────┐
+                    │   OverlapPatchEmbed     │
+                    │      3 → 48 channels    │
+                    └─────────────────────────┘
+                                  │
+                                  ▼
+                         (B, 48, H, W)
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
+                    ▼                           ▼
+          ┌─────────────────┐      ┌─────────────────────────┐
+          │ DualDomainProto │      │   Encoder Level 1       │
+          │      Bank       │      │   TransformerBlock × 4  │
+          │                 │      │   (48 channels)         │
+          └────────┬────────┘      └──────────┬──────────────┘
+                   │                          │
+                   │                          ▼
+                   │                    ┌──────────┐
+                   │                    │  DRA[0]  │ ← proto (48)
+                   │                    └──────┬───┘
+                   │                           │
+                   │                    e1: (B, 48, H, W) ────┐
+                   │                           │              │
+                   │                           ▼              │
+                   │                    ┌─────────────┐       │
+                   │                    │ Downsample  │       │
+                   │                    │  48 → 96    │       │
+                   │                    └──────┬──────┘       │
+                   │                           │              │
+                   │                    (B, 96, H/2, W/2)     │
+                   │                           │              │
+                   │                           ▼              │
+                   │              ┌─────────────────────────┐ │
+                   │              │   Encoder Level 2       │ │
+                   │              │   TransformerBlock × 6  │ │
+                   │              │   (96 channels)         │ │
+                   │              └──────────┬──────────────┘ │
+                   │                         │                │
+                   │                         ▼                │
+                   │                   ┌──────────┐           │
+                   │                   │  DRA[1]  │ ← proto   │
+                   │                   └──────┬───┘           │
+                   │                          │               │
+                   │                   e2: (B, 96, H/2, W/2) ─┤
+                   │                          │               │
+                   │                          ▼               │
+                   │                   ┌─────────────┐        │
+                   │                   │ Downsample  │        │
+                   │                   │  96 → 192   │        │
+                   │                   └──────┬──────┘        │
+                   │                          │               │
+                   │                   (B, 192, H/4, W/4)     │
+                   │                          │               │
+                   │                          ▼               │
+                   │            ┌─────────────────────────┐   │
+                   │            │   Encoder Level 3       │   │
+                   │            │   TransformerBlock × 6  │   │
+                   │            │   (192 channels)        │   │
+                   │            └──────────┬──────────────┘   │
+                   │                       │                  │
+                   │                       ▼                  │
+                   │                  ┌──────────┐            │
+                   │                  │  DRA[2]  │ ← proto    │
+                   │                  └──────┬───┘            │
+                   │                         │                │
+                   │                  e3: (B, 192, H/4, W/4) ─┤
+                   │                         │                │
+                   │                         ▼                │
+                   │                  ┌─────────────┐         │
+                   │                  │ Downsample  │         │
+                   │                  │  192 → 384  │         │
+                   │                  └──────┬──────┘         │
+                   │                         │                │
+                   │                  (B, 384, H/8, W/8)      │
+                   │                         │                │
+                   │                         ▼                │
+                   │           ┌─────────────────────────┐    │
+                   │           │   Encoder Level 4       │    │
+                   │           │   TransformerBlock × 8  │    │
+                   │           │   (384 channels)        │    │
+                   │           └──────────┬──────────────┘    │
+                   │                      │                   │
+                   │                      ▼                   │
+                   │                 ┌──────────┐             │
+                   │                 │  DRA[3]  │ ← proto     │
+                   │                 └──────┬───┘             │
+                   │                        │                 │
+                   │                 e4: (B, 384, H/8, W/8)   │
+                   │                        │                 │
+                   │                        ▼                 │
+                   │           ┌─────────────────────────┐    │
+                   │           │      Bottleneck         │    │
+                   │           │   TransformerBlock × 2  │    │
+                   │           │   (384 channels)        │    │
+                   │           └──────────┬──────────────┘    │
+                   │                      │                   │
+                   │                      ▼                   │
+                   │               (B, 384, H/8, W/8)         │
+                   │                      │                   │
+                   │                      ▼                   │
+                   │               ┌─────────────┐            │
+                   │               │  Upsample   │            │
+                   │               │  384 → 192  │            │
+                   │               └──────┬──────┘            │
+                   │                      │                   │
+                   │                      ├─────────────────<─┘
+                   │                      │ + e3
+                   │                      ▼
+                   │           ┌─────────────────────────┐
+                   │           │   Decoder Level 1       │
+                   │           │   D2R_MoE (192 ch)      │
+                   │           │   - 3 Experts           │
+                   │           │   - Difficulty Est      │
+                   │           │   - Cross Attention     │
+                   │           └──────────┬──────────────┘
+                   │                      │
+                   │                      ▼
+                   │               ┌─────────────┐
+                   │               │  Upsample   │
+                   │               │  192 → 96   │
+                   │               └──────┬──────┘
+                   │                      │
+                   │                      ├─────────────────<─┐
+                   │                      │ + e2              │
+                   │                      ▼                   │
+                   │           ┌─────────────────────────┐    │
+                   │           │   Decoder Level 2       │    │
+                   │           │   D2R_MoE (96 ch)       │    │
+                   │           │   - 3 Experts           │    │
+                   │           │   - Difficulty Est      │    │
+                   │           │   - Cross Attention     │    │
+                   │           └──────────┬──────────────┘    │
+                   │                      │                   │
+                   │                      ▼                   │
+                   │               ┌─────────────┐            │
+                   │               │  Upsample   │            │
+                   │               │   96 → 48   │            │
+                   │               └──────┬──────┘            │
+                   │                      │                   │
+                   │                      ├─────────────────<─┘
+                   │                      │ + e1
+                   │                      ▼
+                   │           ┌─────────────────────────┐
+                   │           │   Decoder Level 3       │
+                   │           │   D2R_MoE (48 ch)       │
+                   │           │   - 3 Experts           │
+                   │           │   - Difficulty Est      │
+                   │           │   - Cross Attention     │
+                   │           └──────────┬──────────────┘
+                   │                      │
+                   │                      ▼
+                   │               (B, 48, H, W)
+                   │                      │
+                   │                      ▼
+                   │           ┌─────────────────────────┐
+                   │           │      Refinement         │
+                   │           │   TransformerBlock × 4  │
+                   │           │   (48 channels)         │
+                   │           └──────────┬──────────────┘
+                   │                      │
+                   │                      ▼
+                   │               ┌─────────────┐
+                   │               │   Output    │
+                   │               │  Conv 48→3  │
+                   │               └──────┬──────┘
+                   │                      │
+                   └──────────────────────┼───────────────────┐
+                                          │                   │
+                                          ▼                   │
+                                    Residual Add  <───────────┘
+                                          │
+                                          ▼
+                                  OUTPUT: (B, 3, H, W)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                              KEY COMPONENTS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Dual-Domain Prototype Bank (DDP)
+   ├─ Learns K spatial prototypes
+   ├─ Learns K frequency prototypes
+   └─ Generates degradation embedding (proto)
+
+2. Degradation Residual Adapter (DRA)
+   ├─ Modulates features using proto embedding
+   ├─ Applied at each encoder level
+   └─ Adapts proto_dim to feature_dim
+
+3. D2R-MoE (Difficulty-aware Dynamic Routing MoE)
+   ├─ 3 Experts (depth: 1, 2, 4 transformer blocks)
+   ├─ Difficulty Estimator (spatial + frequency)
+   ├─ Dynamic routing weights
+   └─ Cross-attention for feature refinement
+
+4. U-Net Architecture
+   ├─ 4 Encoder levels: 48 → 96 → 192 → 384 channels
+   ├─ Bottleneck: 384 channels
+   ├─ 3 Decoder levels: 384 → 192 → 96 → 48 channels
+   └─ Skip connections at each level
+
+══════════════════════════════════════════════════════════════════��════════════
+                           CHANNEL DIMENSIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+Level    Resolution    Encoder    Decoder    DRA          Heads
+─────────────────────────────────────────────────────────────────────────────
+0        H × W         48         48         (48, 48)     1
+1        H/2 × W/2     96         96         (96, 48)     2
+2        H/4 × W/4     192        192        (192, 48)    4
+3        H/8 × W/8     384        384        (384, 48)    8
+
+═══════════════════════════════════════════════════════════════════════════════
+                          DOWNSAMPLING/UPSAMPLING
+═══════════════════════════════════════════════════════════════════════════════
+
+Downsample(n_feat):
+  Input: n_feat channels
+  Conv2d: n_feat → n_feat//2
+  PixelUnshuffle(2): n_feat//2 → n_feat*2 (×4 channels, ÷4 spatial)
+  Output: n_feat*2 channels at 1/2 resolution
+
+Upsample(n_feat):
+  Input: n_feat channels
+  Conv2d: n_feat → n_feat*2
+  PixelShuffle(2): n_feat*2 → n_feat//2 (÷4 channels, ×4 spatial)
+  Output: n_feat//2 channels at 2× resolution
+
+```
