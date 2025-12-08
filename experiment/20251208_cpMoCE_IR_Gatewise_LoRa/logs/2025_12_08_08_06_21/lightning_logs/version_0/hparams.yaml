@@ -1,0 +1,42 @@
+LoRa_attn_ratio: 0.8
+LoRa_ffn_ratio: 0.5
+accum_grad: 1
+batch_size: 8
+benchmarks: null
+checkpoint_id: null
+ckpt_dir: checkpoints
+data_file_dir: /home/aiswjtu/hl/img_data/Data/
+de_type:
+- denoise_15
+- denoise_25
+- denoise_50
+- dehaze
+- derain
+- deblur
+- synllie
+dim: 48
+epochs: 200
+fine_tune_from: null
+gate_type: elementwise
+heads:
+- 1
+- 2
+- 4
+- 8
+lr: 0.0002
+model: model
+num_blocks:
+- 4
+- 6
+- 6
+- 8
+num_gpus: 2
+num_refinement_blocks: 4
+num_workers: 8
+output_path: output/
+patch_size: 128
+resume_from: null
+save_results: false
+time_stamp: '2025_12_08_08_06_21'
+trainset: standard
+wblogger: false
