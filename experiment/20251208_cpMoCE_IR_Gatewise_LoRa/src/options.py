@@ -54,8 +54,9 @@ def model_ir_s(parser):
     parser.add_argument('--heads', nargs='+', type=int, default=[1, 2, 4, 8])
     parser.add_argument('--num_refinement_blocks', type=int, default=4)
     parser.add_argument('--gate_type', type=str, default="elementwise", help='GateType: None/headwise/elementwise')
-    parser.add_argument('--LoRa_ffn_ratio', type=float, default=0.5, help='')
-    parser.add_argument('--LoRa_attn_ratio', type=float, default=0.8, help='')
+    parser.add_argument('--ffn_scales', type=int, default=2, help='FFN分块数量，控制GatedFFNWithSplitConv的scales参数')
+    parser.add_argument('--LoRa_ffn_ratio', type=float, default=0.5, help='LoRA FFN层压缩比例')
+    parser.add_argument('--LoRa_attn_ratio', type=float, default=0.8, help='LoRA Attention层压缩比例')
 
     return parser
 
@@ -65,8 +66,9 @@ def model_ir(parser):
     parser.add_argument('--heads', nargs='+', type=int, default=[1, 2, 4, 8])
     parser.add_argument('--num_refinement_blocks', type=int, default=4)
     parser.add_argument('--gate_type', type=str, default="elementwise",help='GateType: None/headwise/elementwise')
-    parser.add_argument('--LoRa_ffn_ratio', type=float, default=0.5,)
-    parser.add_argument('--LoRa_attn_ratio', type=float, default=0.8,)
+    parser.add_argument('--ffn_scales', type=int, default=2, help='FFN分块数量，控制GatedFFNWithSplitConv的scales参数')
+    parser.add_argument('--LoRa_ffn_ratio', type=float, default=0.5, help='LoRA FFN层压缩比例')
+    parser.add_argument('--LoRa_attn_ratio', type=float, default=0.8, help='LoRA Attention层压缩比例')
 
     return parser
 

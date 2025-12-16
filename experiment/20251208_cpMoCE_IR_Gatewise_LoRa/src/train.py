@@ -1,250 +1,3 @@
-# from typing import List
-# import os
-# import time
-# import pathlib
-# import numpy as np
-# from tqdm import tqdm
-# from datetime import datetime
-# import torch.nn as nn
-# import torch.optim as optim
-# import lightning.pytorch as pl
-# from torch.utils.data import DataLoader
-# from lightning.pytorch.callbacks import ModelCheckpoint, Callback
-# from lightning.pytorch.loggers import WandbLogger, TensorBoardLogger
-# from lightning.pytorch.utilities.rank_zero import rank_zero_info
-# from lightning.pytorch import Trainer, seed_everything
-
-
-# from net.model import LoRa_Gate_Restormer,apply_mixed_strategy_lora
-# from options import train_options
-# from utils.schedulers import LinearWarmupCosineAnnealingLR
-# from data.dataset_utils import AIOTrainDataset, CDD11
-
-
-# # 训练时间统计回调
-# class TrainingTimeCallback(Callback):
-#     def __init__(self):
-#         super().__init__()
-#         self.start_time = None
-#         self.end_time = None
-
-#     def on_train_start(self, trainer, pl_module):
-#         """训练开始时记录时间"""
-#         self.start_time = time.time()
-#         rank_zero_info(f"\nTraining started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-
-#     def on_train_end(self, trainer, pl_module):
-#         """训练结束时计算并输出总时间"""
-#         self.end_time = time.time()
-#         total_time = self.end_time - self.start_time
-        
-#         # 转换为小时:分钟:秒格式
-#         hours = int(total_time // 3600)
-#         minutes = int((total_time % 3600) // 60)
-#         seconds = int(total_time % 60)
-        
-#         rank_zero_info(f"\nTraining completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-#         rank_zero_info(f"Total training time: {hours}h {minutes}m {seconds}s ({total_time:.2f} seconds)")
-
-
-# class PLTrainModel(pl.LightningModule):
-#     def __init__(self, opt):
-#         super().__init__()
-#         self.opt = opt
-        
-#         # 将所有参数保存到hparams（关键：Lightning会自动将hparams存入检查点）
-#         self.save_hyperparameters(self._convert_opt_to_dict(opt))
-        
-#         # 初始化模型
-#         self.net = LoRa_Gate_Restormer(
-#             dim=opt.dim,
-#             num_blocks=opt.num_blocks,
-#             num_refinement_blocks=opt.num_refinement_blocks,
-#             heads=opt.heads,
-#             gate_type=opt.gate_type
-#         )
-#         self.net = apply_mixed_strategy_lora(self.net, 
-#                                              Lora_ffn_ratio=opt.LoRa_ffn_ratio, 
-#                                              Lora_attn_ratio=opt.LoRa_attn_ratio,
-#                                              )
-        
-#         self.loss_fn = nn.L1Loss()
-    
-#     def _convert_opt_to_dict(self, opt):
-#         """将argparse.Namespace转换为字典，处理特殊类型"""
-#         opt_dict = vars(opt)
-#         # 处理numpy类型/列表等不能序列化的类型
-#         for key, value in opt_dict.items():
-#             if isinstance(value, (np.ndarray, np.generic)):
-#                 opt_dict[key] = value.tolist()
-#             elif isinstance(value, pathlib.Path):
-#                 opt_dict[key] = str(value)
-#         return opt_dict
-    
-#     def forward(self, x):
-#         return self.net(x)
-    
-#     def training_step(self, batch, batch_idx):
-#         ([clean_name, de_id], degrad_patch, clean_patch) = batch
-#         restored = self.net(degrad_patch, de_id)
-    
-#         loss = self.loss_fn(restored, clean_patch)
-            
-#         self.log("Train_Loss", loss, sync_dist=True)
-#         lr = self.trainer.optimizers[0].param_groups[0]["lr"]
-#         self.log("LR Schedule", lr, sync_dist=True)
-
-#         return loss
-        
-#     def lr_scheduler_step(self, scheduler, metric):
-#         scheduler.step()
-    
-#     def configure_optimizers(self):
-#         optimizer = optim.AdamW(self.parameters(), lr=self.opt.lr)  # 使用opt中的lr而非硬编码
-#         scheduler = LinearWarmupCosineAnnealingLR(
-#             optimizer=optimizer,
-#             warmup_epochs=15,
-#             max_epochs=150
-#         )
-        
-#         if self.opt.fine_tune_from:
-#             scheduler = LinearWarmupCosineAnnealingLR(
-#                 optimizer=optimizer,
-#                 warmup_epochs=1,
-#                 max_epochs=self.opt.epochs
-#             )      
-#         return [optimizer], [scheduler]
-
-
-# def main(opt):
-#     # ========== 核心修复：全程复用唯一的time_stamp ==========
-#     time_stamp = opt.time_stamp  # 直接使用opt中预先生成的唯一的time_stamp
-    
-#     # 只在主进程打印参数
-#     rank_zero_info("="*50)
-#     rank_zero_info("Training Options")
-#     rank_zero_info("="*50)
-#     for key, value in sorted(vars(opt).items()):
-#         rank_zero_info(f"{key:<30}: {value}")
-#     rank_zero_info("="*50)
-        
-#     # 日志文件夹：基于唯一time_stamp创建
-#     log_dir = os.path.join("logs/", time_stamp)
-#     pathlib.Path(log_dir).mkdir(parents=True, exist_ok=True)
-    
-#     # 初始化logger（确保TensorBoardLogger也保存hparams）
-#     if opt.wblogger:
-#         name = f"{opt.model}_{time_stamp}"
-#         logger = WandbLogger(
-#             name=name, 
-#             save_dir=log_dir, 
-#             config=opt,
-#             log_model="all"
-#         )
-#     else:
-#         logger = TensorBoardLogger(
-#             save_dir=log_dir,
-#             default_hp_metric=False  # 禁用默认的hp_metric
-#         )
-
-#     # 创建模型
-#     if opt.fine_tune_from:
-#         model = PLTrainModel.load_from_checkpoint(
-#             os.path.join(opt.ckpt_dir, opt.fine_tune_from, "last.ckpt"), 
-#             opt=opt
-#         )
-#     else:
-#         model = PLTrainModel(opt)
-
-#     # 检查点文件夹：基于唯一time_stamp创建
-#     checkpoint_path = os.path.join(opt.ckpt_dir, time_stamp)
-#     pathlib.Path(checkpoint_path).mkdir(parents=True, exist_ok=True)
-    
-#     # 修复：移除错误的save_hyperparameters参数
-#     checkpoint_callback = ModelCheckpoint(
-#         dirpath=checkpoint_path, 
-#         every_n_epochs=5, 
-#         save_top_k=-1, 
-#         save_last=True  # 仅保留有效参数
-#     )
-    
-#     # 训练时间回调
-#     time_callback = TrainingTimeCallback()
-    
-#     # 创建数据集和数据加载器
-#     if "CDD11" in opt.trainset:
-#         _, subset = opt.trainset.split("_")
-#         trainset = CDD11(opt, split="train", subset=subset)
-#     else:
-#         trainset = AIOTrainDataset(opt)
-        
-#     trainloader = DataLoader(
-#         trainset, 
-#         batch_size=opt.batch_size, 
-#         pin_memory=True, 
-#         shuffle=True, 
-#         drop_last=True, 
-#         num_workers=opt.num_workers
-#     )
-    
-#     # 创建训练器 - 添加混合精度设置
-#     trainer = pl.Trainer(
-#         max_epochs=opt.epochs,
-#         accelerator="gpu",
-#         devices=opt.num_gpus,
-#         strategy="ddp_find_unused_parameters_true",
-#         logger=logger,
-#         callbacks=[checkpoint_callback, time_callback],  # 添加时间回调
-#         accumulate_grad_batches=opt.accum_grad,
-#         deterministic=True,
-#         log_every_n_steps=10,  # 可选：控制日志打印频率
-#         precision="16-mixed"  # 启用混合精度训练，适用于V100
-#     )
-    
-#     # 恢复训练的检查点路径
-#     resume_ckpt_path = None
-#     if opt.resume_from:
-#         resume_ckpt_path = os.path.join(opt.ckpt_dir, opt.resume_from, "last.ckpt")
-#         rank_zero_info(f"\nResuming training from checkpoint: {resume_ckpt_path}")
-
-#     # 开始训练
-#     rank_zero_info(f"\nStarting training...")
-#     trainer.fit(
-#         model=model, 
-#         train_dataloaders=trainloader, 
-#         ckpt_path=resume_ckpt_path
-#     )
-    
-#     # 训练总结
-#     if hasattr(time_callback, 'end_time'):
-#         total_time = time_callback.end_time - time_callback.start_time
-#         hours = int(total_time // 3600)
-#         minutes = int((total_time % 3600) // 60)
-#         seconds = int(total_time % 60)
-#         rank_zero_info(f"\n" + "="*50)
-#         rank_zero_info("Training Summary")
-#         rank_zero_info("="*50)
-#         rank_zero_info(f"Total training time: {hours}h {minutes}m {seconds}s")
-#         rank_zero_info(f"Epochs completed: {trainer.current_epoch}")
-#         rank_zero_info(f"Model checkpoints saved to: {checkpoint_path}")
-#         rank_zero_info(f"Logs saved to: {log_dir}")
-#         rank_zero_info("="*50)
-
-
-# if __name__ == '__main__':
-#     # ========== 关键：在解析参数后、主进程中唯一生成时间戳 ==========
-#     train_opt = train_options()
-    
-#     # 生成唯一的时间戳（只生成一次！）
-#     unique_time_stamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
-    
-#     # 将时间戳添加到opt中，全程复用
-#     train_opt.time_stamp = unique_time_stamp
-    
-#     # 运行主训练函数
-#     main(train_opt)
-
-
 
 import sys  # <--- 新增：用于控制标准输出
 import os
@@ -262,13 +15,13 @@ from lightning.pytorch.loggers import WandbLogger, TensorBoardLogger
 from lightning.pytorch.utilities.rank_zero import rank_zero_info
 from lightning.pytorch import Trainer, seed_everything
 
-from net.model import LoRa_Gate_Restormer, apply_mixed_strategy_lora
+from net.new_mode import LoRa_Gate_Restormer, apply_mixed_strategy_lora
 from options import train_options
 from utils.schedulers import LinearWarmupCosineAnnealingLR
 from data.dataset_utils import AIOTrainDataset, CDD11
 
 
-# ========== 新增：双重输出记录器 (屏幕 + 文件) ==========
+
 class TeeLogger(object):
     def __init__(self, filename="Default.log"):
         self.terminal = sys.stdout
@@ -340,19 +93,22 @@ class PLTrainModel(pl.LightningModule):
         
         # 将所有参数保存到hparams
         self.save_hyperparameters(self._convert_opt_to_dict(opt))
-        
-        # 初始化模型
+
+        # 初始化模型（使用new_mode.py中的LoRa_Gate_Restormer）
         self.net = LoRa_Gate_Restormer(
             dim=opt.dim,
             num_blocks=opt.num_blocks,
             num_refinement_blocks=opt.num_refinement_blocks,
             heads=opt.heads,
-            gate_type=opt.gate_type
+            gate_type=opt.gate_type,
+            ffn_scales=opt.ffn_scales  # 添加FFN分块参数
         )
-        self.net = apply_mixed_strategy_lora(self.net, 
-                                             Lora_ffn_ratio=opt.LoRa_ffn_ratio, 
-                                             Lora_attn_ratio=opt.LoRa_attn_ratio,
-                                             )
+        # 应用LoRA策略（注意：参数名需匹配apply_mixed_strategy_lora的签名）
+        self.net = apply_mixed_strategy_lora(
+            self.net,
+            ffn_ratio=opt.LoRa_ffn_ratio,  # 修正参数名：ffn_ratio
+            attn_ratio=opt.LoRa_attn_ratio  # 修正参数名：attn_ratio
+        )
         
         self.loss_fn = nn.L1Loss()
     
@@ -371,7 +127,8 @@ class PLTrainModel(pl.LightningModule):
     
     def training_step(self, batch, batch_idx):
         ([clean_name, de_id], degrad_patch, clean_patch) = batch
-        restored = self.net(degrad_patch, de_id)
+        # Fixed: model.forward() only accepts inp_img, not de_id
+        restored = self.net(degrad_patch)
     
         loss = self.loss_fn(restored, clean_patch)
             

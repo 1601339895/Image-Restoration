@@ -15,7 +15,7 @@ import torch.nn as nn
 import lightning.pytorch as pl
 from torch.utils.data import DataLoader
 
-from net.model import LoRa_Gate_Restormer,apply_mixed_strategy_lora
+from net.new_mode import LoRa_Gate_Restormer, apply_mixed_strategy_lora
 from options import train_options
 from utils.test_utils import save_img
 from data.dataset_utils import IRBenchmarks, CDD11
