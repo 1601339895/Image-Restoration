@@ -1,0 +1,41 @@
+accum_grad: 1
+batch_size: 16
+benchmarks: null
+checkpoint_id: null
+ckpt_dir: /data/project/All-in-One_image_restoration/Train/train_log_checkpoints/20260104_CG_IR/five_checkpoints
+context_dim: 64
+data_file_dir: /data/project/All-in-One_image_restoration/img_restoration_data/all_in_one_data
+de_type:
+- denoise_15
+- denoise_25
+- denoise_50
+- dehaze
+- derain
+- deblur
+- synllie
+dim: 48
+epochs: 120
+fine_tune_from: null
+heads:
+- 1
+- 2
+- 4
+- 8
+lr: 0.0002
+model: model
+num_blocks:
+- 4
+- 6
+- 6
+- 8
+num_gpus: 4
+num_refinement_blocks: 4
+num_scales: 3
+num_workers: 16
+output_path: output/
+patch_size: 128
+resume_from: null
+save_results: false
+time_stamp: '2026_01_04_17_51_37'
+trainset: standard
+wblogger: false

@@ -1,0 +1,1185 @@
+PLTrainModel(
+  (net): Context_Gated_IR(
+    (context_net): Degradation_Aware_Module(
+      (stem): Sequential(
+        (0): Conv2d(3, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GELU(approximate='none')
+      )
+      (scale_branches): ModuleList(
+        (0): Sequential(
+          (0): Conv2d(48, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=48)
+          (1): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1): Sequential(
+          (0): Conv2d(48, 48, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=48)
+          (1): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (2): Sequential(
+          (0): Conv2d(48, 48, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3), groups=48)
+          (1): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (fusion): Conv2d(144, 64, kernel_size=(1, 1), stride=(1, 1))
+      (spatial_gate): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+      (sigmoid): Sigmoid()
+      (global_process): Sequential(
+        (0): Linear(in_features=128, out_features=64, bias=True)
+        (1): LayerNorm((64,), eps=1e-05, elementwise_affine=True)
+        (2): GELU(approximate='none')
+        (3): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (layer_prompts): ModuleList(
+        (0): Linear(in_features=64, out_features=48, bias=True)
+        (1): Linear(in_features=64, out_features=96, bias=True)
+        (2): Linear(in_features=64, out_features=192, bias=True)
+        (3): Linear(in_features=64, out_features=384, bias=True)
+      )
+    )
+    (patch_embed): OverlapPatchEmbed(
+      (proj): Conv2d(3, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    )
+    (encoder_level1): ModuleList(
+      (0-3): 4 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(48, 144, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(144, 144, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=144, bias=False)
+          (project_out): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=48, out_features=12, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=12, out_features=1, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=48, out_features=48, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(48, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=48, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(48, 254, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(254, 254, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=254, bias=False)
+          (project_out): Conv2d(127, 48, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (down1_2): Downsample(
+      (body): Sequential(
+        (0): Conv2d(48, 24, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelUnshuffle(downscale_factor=2)
+      )
+    )
+    (encoder_level2): ModuleList(
+      (0-5): 6 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(96, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(288, 288, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=288, bias=False)
+          (project_out): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=24, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=24, out_features=2, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=96, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(96, 510, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(510, 510, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=510, bias=False)
+          (project_out): Conv2d(255, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (down2_3): Downsample(
+      (body): Sequential(
+        (0): Conv2d(96, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelUnshuffle(downscale_factor=2)
+      )
+    )
+    (encoder_level3): ModuleList(
+      (0-5): 6 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(192, 576, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(576, 576, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=576, bias=False)
+          (project_out): Conv2d(192, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=192, out_features=48, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=48, out_features=4, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=192, out_features=192, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(192, 1020, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(1020, 1020, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1020, bias=False)
+          (project_out): Conv2d(510, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (down3_4): Downsample(
+      (body): Sequential(
+        (0): Conv2d(192, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelUnshuffle(downscale_factor=2)
+      )
+    )
+    (latent): ModuleList(
+      (0-7): 8 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(384, 1152, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(1152, 1152, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1152, bias=False)
+          (project_out): Conv2d(384, 384, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=384, out_features=96, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=96, out_features=8, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=384, out_features=384, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(384, 2042, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(2042, 2042, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=2042, bias=False)
+          (project_out): Conv2d(1021, 384, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (up4_3): Upsample(
+      (body): Sequential(
+        (0): Conv2d(384, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelShuffle(upscale_factor=2)
+      )
+    )
+    (skip_fusion3): Adaptive_Gated_Fusion(
+      (spatial_gate): Sequential(
+        (0): Conv2d(384, 192, kernel_size=(1, 1), stride=(1, 1))
+        (1): GroupNorm(8, 192, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+        (4): ReLU(inplace=True)
+        (5): Conv2d(192, 192, kernel_size=(1, 1), stride=(1, 1))
+      )
+      (avg_pool): AdaptiveAvgPool2d(output_size=1)
+      (channel_gate): Sequential(
+        (0): Linear(in_features=384, out_features=96, bias=True)
+        (1): ReLU(inplace=True)
+        (2): Linear(in_features=96, out_features=192, bias=True)
+      )
+      (fusion_conv): Sequential(
+        (0): Conv2d(384, 192, kernel_size=(1, 1), stride=(1, 1))
+        (1): GELU(approximate='none')
+      )
+    )
+    (decoder_level3): ModuleList(
+      (0-5): 6 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(192, 576, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(576, 576, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=576, bias=False)
+          (project_out): Conv2d(192, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=192, out_features=48, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=48, out_features=4, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=192, out_features=192, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(192, 1020, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(1020, 1020, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1020, bias=False)
+          (project_out): Conv2d(510, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (up3_2): Upsample(
+      (body): Sequential(
+        (0): Conv2d(192, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelShuffle(upscale_factor=2)
+      )
+    )
+    (skip_fusion2): Adaptive_Gated_Fusion(
+      (spatial_gate): Sequential(
+        (0): Conv2d(192, 96, kernel_size=(1, 1), stride=(1, 1))
+        (1): GroupNorm(8, 96, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96)
+        (4): ReLU(inplace=True)
+        (5): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1))
+      )
+      (avg_pool): AdaptiveAvgPool2d(output_size=1)
+      (channel_gate): Sequential(
+        (0): Linear(in_features=192, out_features=48, bias=True)
+        (1): ReLU(inplace=True)
+        (2): Linear(in_features=48, out_features=96, bias=True)
+      )
+      (fusion_conv): Sequential(
+        (0): Conv2d(192, 96, kernel_size=(1, 1), stride=(1, 1))
+        (1): GELU(approximate='none')
+      )
+    )
+    (decoder_level2): ModuleList(
+      (0-5): 6 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(96, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(288, 288, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=288, bias=False)
+          (project_out): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=24, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=24, out_features=2, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=96, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(96, 510, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(510, 510, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=510, bias=False)
+          (project_out): Conv2d(255, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (up2_1): Upsample(
+      (body): Sequential(
+        (0): Conv2d(96, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelShuffle(upscale_factor=2)
+      )
+    )
+    (skip_fusion1): Adaptive_Gated_Fusion(
+      (spatial_gate): Sequential(
+        (0): Conv2d(96, 48, kernel_size=(1, 1), stride=(1, 1))
+        (1): GroupNorm(8, 48, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(48, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=48)
+        (4): ReLU(inplace=True)
+        (5): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1))
+      )
+      (avg_pool): AdaptiveAvgPool2d(output_size=1)
+      (channel_gate): Sequential(
+        (0): Linear(in_features=96, out_features=24, bias=True)
+        (1): ReLU(inplace=True)
+        (2): Linear(in_features=24, out_features=48, bias=True)
+      )
+      (fusion_conv): Sequential(
+        (0): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1))
+        (1): GELU(approximate='none')
+      )
+    )
+    (decoder_level1): ModuleList(
+      (0-3): 4 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(96, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(288, 288, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=288, bias=False)
+          (project_out): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=24, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=24, out_features=1, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=96, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(96, 510, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(510, 510, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=510, bias=False)
+          (project_out): Conv2d(255, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (refinement): ModuleList(
+      (0-3): 4 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(96, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(288, 288, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=288, bias=False)
+          (project_out): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=24, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=24, out_features=1, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=96, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(96, 510, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(510, 510, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=510, bias=False)
+          (project_out): Conv2d(255, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (output): Conv2d(96, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  )
+  (criterion_pixel): FocalL1Loss()
+  (criterion_fft): FFTLoss(
+    (criterion): L1Loss()
+  )
+)
+PLTrainModel(
+  (net): Context_Gated_IR(
+    (context_net): Degradation_Aware_Module(
+      (stem): Sequential(
+        (0): Conv2d(3, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GELU(approximate='none')
+      )
+      (scale_branches): ModuleList(
+        (0): Sequential(
+          (0): Conv2d(48, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=48)
+          (1): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1): Sequential(
+          (0): Conv2d(48, 48, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=48)
+          (1): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (2): Sequential(
+          (0): Conv2d(48, 48, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3), groups=48)
+          (1): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (fusion): Conv2d(144, 64, kernel_size=(1, 1), stride=(1, 1))
+      (spatial_gate): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+      (sigmoid): Sigmoid()
+      (global_process): Sequential(
+        (0): Linear(in_features=128, out_features=64, bias=True)
+        (1): LayerNorm((64,), eps=1e-05, elementwise_affine=True)
+        (2): GELU(approximate='none')
+        (3): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (layer_prompts): ModuleList(
+        (0): Linear(in_features=64, out_features=48, bias=True)
+        (1): Linear(in_features=64, out_features=96, bias=True)
+        (2): Linear(in_features=64, out_features=192, bias=True)
+        (3): Linear(in_features=64, out_features=384, bias=True)
+      )
+    )
+    (patch_embed): OverlapPatchEmbed(
+      (proj): Conv2d(3, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    )
+    (encoder_level1): ModuleList(
+      (0-3): 4 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(48, 144, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(144, 144, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=144, bias=False)
+          (project_out): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=48, out_features=12, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=12, out_features=1, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=48, out_features=48, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(48, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=48, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(48, 254, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(254, 254, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=254, bias=False)
+          (project_out): Conv2d(127, 48, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (down1_2): Downsample(
+      (body): Sequential(
+        (0): Conv2d(48, 24, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelUnshuffle(downscale_factor=2)
+      )
+    )
+    (encoder_level2): ModuleList(
+      (0-5): 6 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(96, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(288, 288, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=288, bias=False)
+          (project_out): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=24, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=24, out_features=2, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=96, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(96, 510, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(510, 510, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=510, bias=False)
+          (project_out): Conv2d(255, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (down2_3): Downsample(
+      (body): Sequential(
+        (0): Conv2d(96, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelUnshuffle(downscale_factor=2)
+      )
+    )
+    (encoder_level3): ModuleList(
+      (0-5): 6 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(192, 576, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(576, 576, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=576, bias=False)
+          (project_out): Conv2d(192, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=192, out_features=48, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=48, out_features=4, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=192, out_features=192, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(192, 1020, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(1020, 1020, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1020, bias=False)
+          (project_out): Conv2d(510, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (down3_4): Downsample(
+      (body): Sequential(
+        (0): Conv2d(192, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelUnshuffle(downscale_factor=2)
+      )
+    )
+    (latent): ModuleList(
+      (0-7): 8 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(384, 1152, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(1152, 1152, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1152, bias=False)
+          (project_out): Conv2d(384, 384, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=384, out_features=96, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=96, out_features=8, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=384, out_features=384, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(384, 2042, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(2042, 2042, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=2042, bias=False)
+          (project_out): Conv2d(1021, 384, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (up4_3): Upsample(
+      (body): Sequential(
+        (0): Conv2d(384, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelShuffle(upscale_factor=2)
+      )
+    )
+    (skip_fusion3): Adaptive_Gated_Fusion(
+      (spatial_gate): Sequential(
+        (0): Conv2d(384, 192, kernel_size=(1, 1), stride=(1, 1))
+        (1): GroupNorm(8, 192, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+        (4): ReLU(inplace=True)
+        (5): Conv2d(192, 192, kernel_size=(1, 1), stride=(1, 1))
+      )
+      (avg_pool): AdaptiveAvgPool2d(output_size=1)
+      (channel_gate): Sequential(
+        (0): Linear(in_features=384, out_features=96, bias=True)
+        (1): ReLU(inplace=True)
+        (2): Linear(in_features=96, out_features=192, bias=True)
+      )
+      (fusion_conv): Sequential(
+        (0): Conv2d(384, 192, kernel_size=(1, 1), stride=(1, 1))
+        (1): GELU(approximate='none')
+      )
+    )
+    (decoder_level3): ModuleList(
+      (0-5): 6 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(192, 576, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(576, 576, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=576, bias=False)
+          (project_out): Conv2d(192, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=192, out_features=48, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=48, out_features=4, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=192, out_features=192, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(192, 1020, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(1020, 1020, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1020, bias=False)
+          (project_out): Conv2d(510, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (up3_2): Upsample(
+      (body): Sequential(
+        (0): Conv2d(192, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelShuffle(upscale_factor=2)
+      )
+    )
+    (skip_fusion2): Adaptive_Gated_Fusion(
+      (spatial_gate): Sequential(
+        (0): Conv2d(192, 96, kernel_size=(1, 1), stride=(1, 1))
+        (1): GroupNorm(8, 96, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96)
+        (4): ReLU(inplace=True)
+        (5): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1))
+      )
+      (avg_pool): AdaptiveAvgPool2d(output_size=1)
+      (channel_gate): Sequential(
+        (0): Linear(in_features=192, out_features=48, bias=True)
+        (1): ReLU(inplace=True)
+        (2): Linear(in_features=48, out_features=96, bias=True)
+      )
+      (fusion_conv): Sequential(
+        (0): Conv2d(192, 96, kernel_size=(1, 1), stride=(1, 1))
+        (1): GELU(approximate='none')
+      )
+    )
+    (decoder_level2): ModuleList(
+      (0-5): 6 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(96, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(288, 288, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=288, bias=False)
+          (project_out): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=24, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=24, out_features=2, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=96, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(96, 510, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(510, 510, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=510, bias=False)
+          (project_out): Conv2d(255, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (up2_1): Upsample(
+      (body): Sequential(
+        (0): Conv2d(96, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelShuffle(upscale_factor=2)
+      )
+    )
+    (skip_fusion1): Adaptive_Gated_Fusion(
+      (spatial_gate): Sequential(
+        (0): Conv2d(96, 48, kernel_size=(1, 1), stride=(1, 1))
+        (1): GroupNorm(8, 48, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(48, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=48)
+        (4): ReLU(inplace=True)
+        (5): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1))
+      )
+      (avg_pool): AdaptiveAvgPool2d(output_size=1)
+      (channel_gate): Sequential(
+        (0): Linear(in_features=96, out_features=24, bias=True)
+        (1): ReLU(inplace=True)
+        (2): Linear(in_features=24, out_features=48, bias=True)
+      )
+      (fusion_conv): Sequential(
+        (0): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1))
+        (1): GELU(approximate='none')
+      )
+    )
+    (decoder_level1): ModuleList(
+      (0-3): 4 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(96, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(288, 288, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=288, bias=False)
+          (project_out): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=24, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=24, out_features=1, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=96, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(96, 510, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(510, 510, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=510, bias=False)
+          (project_out): Conv2d(255, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (refinement): ModuleList(
+      (0-3): 4 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(96, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(288, 288, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=288, bias=False)
+          (project_out): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=24, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=24, out_features=1, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=96, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(96, 510, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(510, 510, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=510, bias=False)
+          (project_out): Conv2d(255, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (output): Conv2d(96, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  )
+  (criterion_pixel): FocalL1Loss()
+  (criterion_fft): FFTLoss(
+    (criterion): L1Loss()
+  )
+)
+PLTrainModel(
+  (net): Context_Gated_IR(
+    (context_net): Degradation_Aware_Module(
+      (stem): Sequential(
+        (0): Conv2d(3, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): GELU(approximate='none')
+      )
+      (scale_branches): ModuleList(
+        (0): Sequential(
+          (0): Conv2d(48, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=48)
+          (1): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1): Sequential(
+          (0): Conv2d(48, 48, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=48)
+          (1): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (2): Sequential(
+          (0): Conv2d(48, 48, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3), groups=48)
+          (1): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (fusion): Conv2d(144, 64, kernel_size=(1, 1), stride=(1, 1))
+      (spatial_gate): Conv2d(64, 1, kernel_size=(1, 1), stride=(1, 1))
+      (sigmoid): Sigmoid()
+      (global_process): Sequential(
+        (0): Linear(in_features=128, out_features=64, bias=True)
+        (1): LayerNorm((64,), eps=1e-05, elementwise_affine=True)
+        (2): GELU(approximate='none')
+        (3): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (layer_prompts): ModuleList(
+        (0): Linear(in_features=64, out_features=48, bias=True)
+        (1): Linear(in_features=64, out_features=96, bias=True)
+        (2): Linear(in_features=64, out_features=192, bias=True)
+        (3): Linear(in_features=64, out_features=384, bias=True)
+      )
+    )
+    (patch_embed): OverlapPatchEmbed(
+      (proj): Conv2d(3, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    )
+    (encoder_level1): ModuleList(
+      (0-3): 4 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(48, 144, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(144, 144, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=144, bias=False)
+          (project_out): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=48, out_features=12, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=12, out_features=1, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=48, out_features=48, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(48, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=48, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(48, 254, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(254, 254, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=254, bias=False)
+          (project_out): Conv2d(127, 48, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (down1_2): Downsample(
+      (body): Sequential(
+        (0): Conv2d(48, 24, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelUnshuffle(downscale_factor=2)
+      )
+    )
+    (encoder_level2): ModuleList(
+      (0-5): 6 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(96, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(288, 288, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=288, bias=False)
+          (project_out): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=24, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=24, out_features=2, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=96, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(96, 510, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(510, 510, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=510, bias=False)
+          (project_out): Conv2d(255, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (down2_3): Downsample(
+      (body): Sequential(
+        (0): Conv2d(96, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelUnshuffle(downscale_factor=2)
+      )
+    )
+    (encoder_level3): ModuleList(
+      (0-5): 6 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(192, 576, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(576, 576, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=576, bias=False)
+          (project_out): Conv2d(192, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=192, out_features=48, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=48, out_features=4, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=192, out_features=192, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(192, 1020, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(1020, 1020, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1020, bias=False)
+          (project_out): Conv2d(510, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (down3_4): Downsample(
+      (body): Sequential(
+        (0): Conv2d(192, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelUnshuffle(downscale_factor=2)
+      )
+    )
+    (latent): ModuleList(
+      (0-7): 8 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(384, 1152, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(1152, 1152, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1152, bias=False)
+          (project_out): Conv2d(384, 384, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=384, out_features=96, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=96, out_features=8, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=384, out_features=384, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(384, 2042, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(2042, 2042, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=2042, bias=False)
+          (project_out): Conv2d(1021, 384, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (up4_3): Upsample(
+      (body): Sequential(
+        (0): Conv2d(384, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelShuffle(upscale_factor=2)
+      )
+    )
+    (skip_fusion3): Adaptive_Gated_Fusion(
+      (spatial_gate): Sequential(
+        (0): Conv2d(384, 192, kernel_size=(1, 1), stride=(1, 1))
+        (1): GroupNorm(8, 192, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+        (4): ReLU(inplace=True)
+        (5): Conv2d(192, 192, kernel_size=(1, 1), stride=(1, 1))
+      )
+      (avg_pool): AdaptiveAvgPool2d(output_size=1)
+      (channel_gate): Sequential(
+        (0): Linear(in_features=384, out_features=96, bias=True)
+        (1): ReLU(inplace=True)
+        (2): Linear(in_features=96, out_features=192, bias=True)
+      )
+      (fusion_conv): Sequential(
+        (0): Conv2d(384, 192, kernel_size=(1, 1), stride=(1, 1))
+        (1): GELU(approximate='none')
+      )
+    )
+    (decoder_level3): ModuleList(
+      (0-5): 6 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(192, 576, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(576, 576, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=576, bias=False)
+          (project_out): Conv2d(192, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=192, out_features=48, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=48, out_features=4, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=192, out_features=192, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(192, 1020, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(1020, 1020, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1020, bias=False)
+          (project_out): Conv2d(510, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (up3_2): Upsample(
+      (body): Sequential(
+        (0): Conv2d(192, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelShuffle(upscale_factor=2)
+      )
+    )
+    (skip_fusion2): Adaptive_Gated_Fusion(
+      (spatial_gate): Sequential(
+        (0): Conv2d(192, 96, kernel_size=(1, 1), stride=(1, 1))
+        (1): GroupNorm(8, 96, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96)
+        (4): ReLU(inplace=True)
+        (5): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1))
+      )
+      (avg_pool): AdaptiveAvgPool2d(output_size=1)
+      (channel_gate): Sequential(
+        (0): Linear(in_features=192, out_features=48, bias=True)
+        (1): ReLU(inplace=True)
+        (2): Linear(in_features=48, out_features=96, bias=True)
+      )
+      (fusion_conv): Sequential(
+        (0): Conv2d(192, 96, kernel_size=(1, 1), stride=(1, 1))
+        (1): GELU(approximate='none')
+      )
+    )
+    (decoder_level2): ModuleList(
+      (0-5): 6 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(96, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(288, 288, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=288, bias=False)
+          (project_out): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=24, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=24, out_features=2, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=96, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(96, 510, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(510, 510, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=510, bias=False)
+          (project_out): Conv2d(255, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (up2_1): Upsample(
+      (body): Sequential(
+        (0): Conv2d(96, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): PixelShuffle(upscale_factor=2)
+      )
+    )
+    (skip_fusion1): Adaptive_Gated_Fusion(
+      (spatial_gate): Sequential(
+        (0): Conv2d(96, 48, kernel_size=(1, 1), stride=(1, 1))
+        (1): GroupNorm(8, 48, eps=1e-05, affine=True)
+        (2): ReLU(inplace=True)
+        (3): Conv2d(48, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=48)
+        (4): ReLU(inplace=True)
+        (5): Conv2d(48, 48, kernel_size=(1, 1), stride=(1, 1))
+      )
+      (avg_pool): AdaptiveAvgPool2d(output_size=1)
+      (channel_gate): Sequential(
+        (0): Linear(in_features=96, out_features=24, bias=True)
+        (1): ReLU(inplace=True)
+        (2): Linear(in_features=24, out_features=48, bias=True)
+      )
+      (fusion_conv): Sequential(
+        (0): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1))
+        (1): GELU(approximate='none')
+      )
+    )
+    (decoder_level1): ModuleList(
+      (0-3): 4 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(96, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(288, 288, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=288, bias=False)
+          (project_out): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=24, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=24, out_features=1, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=96, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(96, 510, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(510, 510, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=510, bias=False)
+          (project_out): Conv2d(255, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (refinement): ModuleList(
+      (0-3): 4 x Context_Gate_TransformerBlock(
+        (norm1): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Context_Gated_Attention(
+          (qkv): Conv2d(96, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (qkv_dwconv): Conv2d(288, 288, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=288, bias=False)
+          (project_out): Conv2d(96, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (temp_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=24, bias=True)
+            (1): ReLU(inplace=True)
+            (2): Linear(in_features=24, out_features=1, bias=True)
+          )
+          (value_gate_adapter): Sequential(
+            (0): Linear(in_features=96, out_features=96, bias=True)
+            (1): Sigmoid()
+          )
+          (local_mixer): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96, bias=False)
+        )
+        (norm2): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (ffn): GDFN(
+          (project_in): Conv2d(96, 510, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (dwconv): Conv2d(510, 510, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=510, bias=False)
+          (project_out): Conv2d(255, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+      )
+    )
+    (output): Conv2d(96, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  )
+  (criterion_pixel): FocalL1Loss()
+  (criterion_fft): FFTLoss(
+    (criterion): L1Loss()
+  )
+)
+Total SynLLIE training pairs : 485
+Total SynLLIE training pairs : 485
+Repeated Dataset length : 9700
+Repeated Dataset length : 9700
+Total SynLLIE training pairs : 485
+Repeated Dataset length : 9700
+Total Deblur training pairs : 2103
+Total Deblur training pairs : 2103Repeated Dataset length : 10515
+
+Repeated Dataset length : 10515
+Total Deblur training pairs : 2103
+Repeated Dataset length : 10515
+Total Derain training pairs : 200
+Total Derain training pairs : 200
+Total Derain training pairs : 200
+Repeated Dataset length : 24000
+Repeated Dataset length : 24000
+Repeated Dataset length : 24000
+Total Dehaze training pairs : 72135
+Repeated Dataset length : 72135
+Total Dehaze training pairs : 72135
+Repeated Dataset length : 72135
+Total Dehaze training pairs : 72135
+Repeated Dataset length : 72135
+Total Denoise Ids : 5144
+Total Denoise Ids : 5144
+Total Denoise Ids : 5144
+Total Denoise Ids : 5144
+Total Denoise Ids : 5144
+Total Denoise Ids : 5144
+Total Denoise Ids : 5144Total Denoise Ids : 5144
+
+Total Denoise Ids : 5144
+162646
+162646
+162646
