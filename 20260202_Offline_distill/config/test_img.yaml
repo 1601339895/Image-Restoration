@@ -1,0 +1,13 @@
+datasets:
+- name: Foreigners_new   # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_af    # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_hard     # 国内人种Chinese
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: helmet_new_20251204_align5p     # 头盔数据
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0

@@ -1,0 +1,57 @@
+feat_dim: 256
+lr_info:
+    lr: 0.1
+    lr_func: 'lr_cosine'
+weight_decay: 0.0001
+optimizer:
+    type: 'SGD'
+    params:
+        momentum: 0.9
+clip_grad:
+    clip: True
+    max_norm: 2.0
+
+
+fp16: True
+num_batch_per_epoch: 1000
+max_epoch: 3000
+
+gpu_per_machine: 8
+nodes: 1
+local_data: False #False 使用本地数据
+checkpoint_interval: 50
+
+batch_size: 512
+input_size: [128, 128]
+output_prefix: 's3://jiigan-faceid/hl/rec/Reproduction/20260129_helmet_aug_data_modify_ratio'
+
+pretrained_path: '/data/project/face_recognition/20260129_helmet_aug_data_modify_ratio/pth/checkpoint_2580.pt'
+
+l2_loss:
+    cos_weight: 1.2
+    l2_weight: 1.0
+    
+
+use_dummy_data: False
+
+sampler_pipe_name:  'hl_sampler_vivo_light_helmet_aug_big_tea1'
+provider_pipe_name: 'hl_provider_vivo_light_helmet_aug_big_tea1'
+
+sampler_batch_size: 256
+ddp_real: True
+dp_image_size: [128, 128]
+
+datasets:
+    dataset_collection: '/data/project/face_recognition/20260129_helmet_aug_data_modify_ratio/config/new_data_list_test.yaml'
+    
+    datasets: 
+    - name: 'cls'
+      path: '/data/project/face_recognition/20260129_helmet_aug_data_modify_ratio/config/test_img.yaml'
+      imgs: 2
+     
+teachers:
+    - name: 'aries'
+      #model_path: 's3://wangjingwen/data/faceid/ensemble_teacher_v9.2_t_pca256.pt'
+      model_path: '/data/project/face_recognition/20260129_helmet_aug_data_modify_ratio/pth/ensemble_teacher_v9.2_t_pca256.pt'
+      input_size: [224, 224] 
+

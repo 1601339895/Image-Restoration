@@ -1,0 +1,79 @@
+datasets:
+#新数据
+- name: new_forign
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: af
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: cn_hard
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: helmet_new_20251204_align5p
+  sample_method: sampler_uniform_person_bq
+  weight: 50.0
+- name: cn_mask
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: helmet_20251031
+  sample_method: sampler_uniform_person_bq
+  weight: 100.0
+- name: helmet_new
+  sample_method: sampler_uniform_person_bq
+  weight: 100.0
+# - name: helmet_test_new
+#   sample_method: sampler_uniform_person_bq
+#   weight: 50.0
+# - name: helmet_train
+#   sample_method: sampler_uniform_person_bq
+#   weight: 1.0
+- name: other
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: richang
+  sample_method: sampler_uniform_person_bq
+  weight: 20.0
+##frr
+- name: AF
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: EU-RGB-FRR
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+##far
+- name: CN-FAR
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: EU-FAR
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+
+### 多设备
+- name: m4_list
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: m5_list
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: qiangji_list
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: qiuji_list
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+### 全人种
+- name: black_africans_latest
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: 0725renzhengji-shandong-2K-white
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: 0725renzhengji-shandong-33W-white
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: eastern_european_whites_fix_latest
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: east_asians_latest
+  sample_method: sampler_uniform_person_bq
+  weight: 1

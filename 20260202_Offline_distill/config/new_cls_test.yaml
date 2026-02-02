@@ -1,0 +1,1064 @@
+datasets:
+
+#新数据
+- name: Foreigners_new   # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_af    # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_hard     # 国内人种Chinese
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: helmet_new_20251204_align5p     # 头盔数据
+  sample_method: sampler_uniform_person_bq
+  weight: 500   # 增大头盔数据的权重比例
+- name: Chinese_mask    # 国内人种Chinese
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: helmet_20251031                 # 头盔数据
+  sample_method: sampler_uniform_person_bq
+  weight: 500
+- name: helmet_new                      # 头盔数据
+  sample_method: sampler_uniform_person_bq
+  weight: 500
+# - name: helmet_test_new  # 大角度的头盔数据，以防止污染整个模型，做过数据增强的，4个id
+#   sample_method: sampler_uniform_person_bq
+#   weight: 50.0
+# - name: helmet_train  # 有大角度，没有做数据增强，50个id
+#   sample_method: sampler_uniform_person_bq
+#   weight: 1.0
+- name: Chinese_other             # 国内人种Chinese
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_richang           # 国内人种Chinese
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+##frr
+- name: Foreigners_AF            # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_EU-RGB-FRR    # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+##far
+- name: Chinese_CN-FAR           # 国内人种Chinese
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_EU-FAR        # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+#hhy数据
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch0-darklight  # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0  
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch1            # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch1-backlight  # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch1-darklight  # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch1-exposure  # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch2-backlight  # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch2-darklight  # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch2-exposure   # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch3            # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch3-backlight  # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch3-darklight  # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch4-backlight   # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0 
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch4-darklight   # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-batch4-exposure    # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-frombase-batch0   # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-frombase-batch1   # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-A-1w-MBJ-RGB-frombase-batch3   # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-women-with_makeup-1w-RGB-batch0  # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-women-with_makeup-1w-RGB-batch1  # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-women-with_makeup-1w-frombase-batch0-fix  # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-main-women-with_makeup-1w-frombase-batch1   # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-real-3ages-201912-traindata-elders   # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-real-3ages-201912-traindata-midage   # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-real-3ages-201912-traindata-young   # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-real-jnts-202004-RGB                # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-real-jnts-202004-RGB-hard           # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_anfang-2                                     # 国内人种Chinese
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_anfang-2-day_outdoor_backlight                # 国内人种Chinese
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_anfang-2-front_day_outdoor_sidelight           # 国内人种Chinese
+  sample_method: sampler_uniform_person_bq
+  weight: 1.5
+
+#旧数据
+- name: Foreigners_black_africans_latest                  # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_0725renzhengji-shandong-2K-white          # 国内人种Chinese
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_0725renzhengji-shandong-33W-white         # 国内人种Chinese
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_eastern_european_whites_fix_latest     # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0 
+- name: Foreigners_east_asians_latest                    # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_mobile-black-africans                  # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Foreigners_mobile-east-asians                      # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_mobile-eastern-european-whites          # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_mobile-southeast-asians                 # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_mobile-western-european-whites          # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_clean.1129.fuse-black                   # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_clean.1129.fuse-spain                    # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_edge-cp3raw-train-mbj_Amod-RGB-mask-v1.0-batch0      # 国内人种Chinese
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_lenovo_nir_dark                                          # 国内人种Chinese
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-w4k2-train-qiangqiuji-RGB-mask-v1.0-batch1      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-passive-w4k2-train-qiangqiuji-IR-nomask-v1.0-batch0     # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-w4k2-train-mbj-IR-nomask-v1.0-batch          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Foreigners_univ1k_white-people_frombase                      # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_edge-passive-subway-train-qiangqiuji-RGB-mask-v1.0-batch0   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-dingzhihua-w4k-train-mianbanji-RGB-mask-darkroom-v1.0   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-dingzhihua-w4k-train-mianbanji-IR-mask-daytime-v1.0     # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_Access-xiaozhu_collect-DV300-primary-ir-mask-batch_0          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_Access-xiaozhu_collect-DV300-junior_high-ir-mask-batch_0        # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_access_train-1kPerson_Collect_facepass-mian-IR_mask             # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-passive-w4k2-train-mbj-IR-nomask-v1.0-batch1             # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-w4k2-train-mbj-w4k-RGB-mask-v1.0                        # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-passive-cp3raw-train-qiangqiuji-IR-mask-v1.0-batch0   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-passive-subway-train-mbj-IR-nomask-v1.0-batch0         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-dingzhihua-w4k-train-mianbanji-IR-nomask-darkroom-v1.1   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-cp3raw-train-qiangqiuji-RGB-mask-v1.0-batch0       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-dingzhihua-w4k-train-mianbanji-IR-mask-darkroom-v1.1       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-cp3raw-train-mbj_w4k-RGB-mask-v1.0-batch0                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_Access-xiaozhu_collect-W4K-junior_high-ir-mask-batch_0       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-cp3raw-train-mbj_Amod-RGB-mask-v1.0                  # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-subway-train-qiangqiuji-RGB-nomask-v1.0-batch0         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-cp3raw-train-qiangqiuji-RGB-mask-v1.0-batch0          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Foreigners_fuse-black                                               # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-dingzhihua-w4k-train-qiuji-RGB-nomask-daytime-v1.0       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-cp3raw-train-mbj_Amod-IR-nomask-v1.0-batch0              # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: vivo-collect-tof-20180926.all-in-one.maskeyebrown.tof920-923         # 暗光数据集
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-passive-w4k2-train-mbj-IR-mask-v1.0-batch1            # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-passive-bosimao-train-mask-IR                          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-cp3raw-train-qiangqiuji-IR-nomask-v1.0-batch0          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-subway-train-mbj-RGB-mask-v1.0-batch0                  # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-subway-train-mbj-RGB-mask-v1.0                         # 国内人种
+  sample_method: sampler_uniform_person_bq           
+  weight: 2.0
+- name: Foreigners_koala_main_3_sunglasses                                 # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2
+- name: Chinese_edge-cp3raw-train-mbj_other-RGB-mask-v1.0-batch0            # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_0725wujiang-white                                       # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_edge-subway-train-mbj-IR-nomask-v1.0-batch0               # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Access-xiaozhu_collect-W5K-senior_high-ir-mask-batch_0     # 国内人种    
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-cp3raw-train-qiangqiuji-RGB-nomask-v1.0-batch0   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-cp3raw-train-mbj-RGB-mask-v1.0-batch0           # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_western_european_whites_latest                                # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_0725suzhou-white                                                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_edge-passive-w4k2-train-qiangqiuji-IR-mask-v1.0-batch1           # 国内人种     
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-w4k2-train-qiangqiuji-IR-mask-v1.0-batch0          # 国内人种
+  sample_method: sampler_uniform_person_bq 
+  weight: 1.0
+- name: Chinese_0725tongren-white                                              # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_0725tongren-haikang-white                                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_edge-cp3raw-train-qiangqiuji-IR-mask-v1.0-batch0               # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Access-xiaozhu_collect-W4K-primary-ir-mask-batch_0              # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_africaface                                                   #  海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2.0
+- name: Chinese_edge-passive-w4k2-train-mbj-RGB-mask-v1.0-batch1                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Access-xiaozhu_collect-W4K-senior_high-ir-mask-batch_0           # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-w4k2-train-qiangqiuji-IR-nomask-v1.0-batch1         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_0725ksdataimage-white                                             # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_Access-xiaozhu_collect-W5K-junior_high-ir-mask-batch_0            # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-cp3raw-train-mbj_w4k-IR-nomask-v1.0-batch0                   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-dingzhihua-w4k-train-mianbanji-IR-nomask-daytime-v1.0        # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-dingzhihua-w4k-train-mianbanji-RGB-nomask-daytime-v1.0       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-cp3raw-train-mbj_Amod-IR-mask-v1.0-batch0                    # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_inu-sec-hichi-white                                           # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_0725jinan-white                                                   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_edge-passive-cp3raw-train-mbj-IR-nomask-v1.0-batch0               # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-cp3raw-train-mbj-IR-mask-v1.0-batch0                 # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-dingzhihua-w4k-train-mianbanji-IR-nomask-darkroom-v1.0        # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Facelock-3000-XRSIR-ir-merge-nomask                                 #  国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_southeast_asians_latest                                          # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-cp3raw-train-qiangqiuji-IR-nomask-v1.0-batch0         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-w4k2-train-mbj-IR-mask-v1.0-batch0                   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_sec-white                                                       # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_edge-dingzhihua-w4k-train-qiuji-RGB-nomask-darkroom-v1.1          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-subway-train-mbj-RGB-nomask-v1.0-batch0                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_sec-yinni-black                                                 # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: white-security                                                             # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_jidimensuo_L2K_2021-10_ir_720_nomask_training                     # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Access-xiaozhu_collect-DV300-senior_high-ir-mask-batch_0    # 国内人种
+  sample_method: sampler_uniform_person_bq 
+  weight: 1.0
+- name: Chinese_inu-main-3-sunglasses                                       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 5
+- name: Foreigners_fuse-spain                                                # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_edge-passive-subway-train-mbj-IR-mask-v1.0-batch0               # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-subway-train-mbj-IR-mask-v1.0-batch0                       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_zk_dark                                                         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-cp3raw-train-mbj_w4k-IR-mask-v1.0-batch0                     # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Access-xiaozhu_collect-W5K-primary-ir-mask-batch_0                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-subway-train-mbj-RGB-mask-v1.0-batch0                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-w4k2-train-qiangqiuji-RGB-nomask-v1.0-batch1         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_univ1k_white-people                                      #海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_yunnan-crj-white                                            # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_edge-w4k2-train-mbj-Amod-RGB-mask-v1.0                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-subway-train-qiangqiuji-RGB-mask-v1.0-batch0            # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_0725langfang-white                                           # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_0725renzhengji-shangdong-latest-white                        # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_0725wuxi-rusuo-white                                        # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+
+### 多设备
+- name: Chinese_m4_list                                          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_m5_list                                         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_qiangji_list                                # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_qiuji_list                                  # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+### 全人种
+- name: Foreigners_black_africans_latest                          # 海外人种
+  sample_method: sampler_uniform_person_bq 
+  weight: 1
+- name: Chinese_0725renzhengji-shandong-2K-white                  # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_0725renzhengji-shandong-33W-white                 # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_eastern_european_whites_fix_latest              # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_east_asians_latest                              # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_middle_easts_latest                           # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_mobile-black-africans                         # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_mobile-east-asians                           # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_mobile-eastern-european-whites               # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_mobile-middle-easts                          # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_mobile-oceanians                             # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_mobile-oceanians                            # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_mobile-southeast-asians                    # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_mobile-western-european-whites            # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_clean.1129.fuse-black                   # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1129.fuse-china                      # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2
+- name: Foreigners_clean.1129.fuse-france                 # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_clean.1129.fuse-india                  # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2
+- name: Foreigners_clean.1129.fuse-italy                 # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_clean.1129.fuse-japan                # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_clean.1129.fuse-korea                 # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_clean.1129.fuse-latin-america          # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2
+- name: Foreigners_clean.1129.fuse-middle-asia          # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 2
+- name: Foreigners_clean.1129.fuse-middle-east         # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_clean.1129.fuse-russia           # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_clean.1129.fuse-slavic          # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.2
+- name: Foreigners_clean.1129.fuse-southeast-asia          # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 5
+- name: Foreigners_clean.1129.fuse-spain              # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_MiddleEast-Africa               # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+
+### 中国区域
+- name: Chinese_wf42mnew                                  # 国内人种
+  sample_method: sampler_uniform_image
+  weight: 1
+- name: Chinese_clean.1025.facepass                       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1129.fuyang                        # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1129.langfang                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1129.mianyang                       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1129.pingdingshan                 # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1129.kindergarten                 # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1129.suzhou                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1129.tianjin                     # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1129.wujiang                   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1129.wuxirusuo                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1129.anfang-2                 # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1204.eerduosi                 # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1204.jinan                     # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1204.jinanzongnan               # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1204.liaoning                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1204.qianlima                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_clean.1204.tangshan               # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_hl.nx.106w                        # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_hl.yl.68W                         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_hl.yl.63W                            # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_hl.yl.22W                        # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_hl.xc.33W                          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_hl.hb.11w                          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_hl.nmg.234w                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_hl.gs.94w                         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_hl.xx.60w                          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_kyz.xj.71w                         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_tongren                           # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_ksdataimage                          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_facepass_cls                          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_yunnan-crj                        # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_new-retail                        # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_yongzhou                         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_bj-5ju-filter                     # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_msr-3                               # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_magic-ccb                          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+### 多角度
+- name: Chinese_multi-angle                                 # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_multi-angle-v2                              # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+### 全年龄
+- name: Chinese_primary-school                              # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_baidu-elders                                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.5
+- name: Chinese_TheAged                                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.5
+- name: Chinese_guizhou-school-3                            # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.5
+- name: Chinese_age_list                                    # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.5
+### 证件照
+- name: Chinese_idcard-multi                            # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_faceid-over1965                       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_faceid                               # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_faceid-women                          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_faceworld_drop_yunnan_tongren          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_inu-koala-5kw                     # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_xwpairs                             # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_celebrity                            # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_occlusion-secdata-NIPI_1_to_100          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_occlusion-secdata-NIPI_101_to_inf         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+### 女性场景
+- name: Foreigners_Koala-mainA-frombase-batch4-female     # 海外人种Foreigners
+  sample_method: sampler_uniform_person_qq
+  weight: 1
+- name: Foreigners_taoist-1w-part2-20190429-female               # 海外人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1
+- name: Foreigners_sec-mobile-huawei-female                      # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_celebrity-female                                # 海外人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1
+  
+  ##口罩
+- name: Chinese_inu_v2_600_repirator_only_clean             # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_inu-main-3-scarfhats-normal-respirator       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_inu-main-3-elders-respirator                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_Koala-real-jnts-respirator              # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_INU-Koala-5kw-respirator              # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_koala1M-respirator                    # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_edge-dingzhihua-w4k-train-mianbanji-RGB-mask-daytime-v1.0        # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-dingzhihua-w4k-train-qiuji-RGB-mask-daytime-v1.0            # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-dingzhihua-w4k-train-mianbanji-RGB-mask-darkroom-v1.1       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0 
+- name: Chinese_edge-dingzhihua-w4k-train-qiuji-RGB-mask-darkroom-v1.1           # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_tianjin-20190426-respirator                                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_pingdingshan-20190426-respirator                                   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_mianyang-20190426-respirator                                       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_pingdingshan-atm-20190426-respirator                                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_fuyang-20190426-respirator                                         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_anfang-2-merge-until-0605-20190616-respirator                     # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_anfang-2-merge-until-31-20190613-respirator                       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_anfang-2-merge-until-21-20190608-respirator                       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_anfang-2-merge-until-25-20190612-respirator                       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_anfang-2-merge-until-10-20190603-respirator                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_Access-xiaozhu_collect-DV300-primary-rgb-mask-batch_0             # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Access-xiaozhu_collect-W4K-primary-rgb-mask-batch_0              # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Access-xiaozhu_collect-W4K-senior_high-rgb-mask-batch_0           # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Access-xiaozhu_collect-DV300-senior_high-rgb-mask-batch_0         # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Access-xiaozhu_collect-W5K-junior_high-rgb-mask-batch_0           # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Access-xiaozhu_collect-W5K-primary-rgb-mask-batch_0               # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Access-xiaozhu_collect-W4K-junior_high-rgb-mask-batch_0           # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_Access_train-1kPerson_Collect_facepass-mian-RGB_mask            # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-bosimao-train-mask-RGB                             # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-dingzhihua-w4k-train-mianbanji-RGB-mask-daytime-v1.0       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-dingzhihua-w4k-train-mianbanji-RGB-mask-darkroom-v1.1       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-w4k2-train-qiangqiuji-RGB-mask-v1.0-batch0          # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-passive-w4k2-train-mbj-RGB-mask-v1.0-batch0                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_black_africans_latest-splitbq                                # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_hwtony-female                               # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_hwtony_base                                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_sec-mid-east-base-fix                 # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_africa-1w-base                      # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_lenovo_no_dark_cls                    # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_lenovo_dark_cls                       # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_sec-mobile-huawei                  # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_phone_10000_rgb                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_mobile-black-africans                     # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_mobile-black-africans               # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_mobile-east-asians               # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_mobile-eastern-european-whites         # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_mobile-huawei-3                      # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_mobile-middle-easts                 #  海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_mobile-oceanians                    #  海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Foreigners_mobile-south-americans              #  海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_mobile-southeast-asians             # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_mobile-western-european-whites      # 海外人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_mobile1                                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_mobile2                                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_mobile3                                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_mobile4                                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_mobile5                                 # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_mobile6                                  # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_mobile7                                 # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_mobile8                                 # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_mobile9                                  # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_mobile10                                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1
+- name: Chinese_mobile11                                 # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile12                                  # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile13                                   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile14                                   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile15                                   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile16                                   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile17                                   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile18                                   # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile19                                    # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile20                                    # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile21                                     # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile22                                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile23                                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile24                                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile25                                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile26                                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile27                                      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_mobile28                                     # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Foreigners_sec-mobile-huawei-female                # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Chinese_camvideo                                     # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.05
+- name: Chinese_camvideo-female                                # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 0.05
+- name: Foreigners_20180516.chinese.indian.russian.x21.png-female        # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 0.05
+- name: Foreigners_20180307.x21.indian.png                            # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 0.1
+- name: Foreigners_20180312.x21.zhashi.png                             # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 0.05
+- name: Foreigners_20180403.indian.x21.zs.png                            # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 0.05
+- name: Foreigners_20180418.russian.x21.zs.png                          # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 0.5
+- name: Foreigners_20180420.indian.x21.zs.png                             # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 0.5
+- name: Foreigners_20180516.chinese.indian.russian.x21.png                # 海外人种Foreigners
+  sample_method: sampler_uniform_person_bq
+  weight: 0.5
+- name: Chinese_edge-cp3raw-train-mbj_Amod-RGB-nomask-v1.0-batch0          # 国内人种
+  sample_methd: sampler_uniform_person_qq
+  weight: 1.0
+- name: Chinese_edge-cp3raw-train-mbj_other-RGB-nomask-v1.0-batch0         # 国内人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1.0
+- name: Chinese_edge-cp3raw-train-mbj_w4k-RGB-nomask-v1.0-batch0          # 国内人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1.0
+- name: Chinese_edge-cp3raw-train-qiangqiuji-RGB-nomask-v1.0-batch0        # 国内人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1.0
+- name: Chinese_edge-cp3raw-train-qiangqiuji-RGB-nomask-v1.0-batch0         # 国内人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1.0
+- name: Chinese_edge-passive-cp3raw-train-mbj-RGB-nomask-v1.0-batch0        # 国内人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1.0
+- name: Chinese_edge-passive-subway-train-mbj-RGB-nomask-v1.0-batch0        # 国内人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1.0
+- name: Chinese_edge-passive-subway-train-qiangqiuji-RGB-nomask-v1.0-batch0    # 国内人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1.0
+- name: Chinese_edge-passive-w4k2-train-mbj-RGB-nomask-v1.0-batch1            # 国内人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1.0
+- name: Chinese_edge-passive-w4k2-train-qiangqiuji-RGB-nomask-v1.0-batch0      # 国内人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1.0
+- name: Chinese_edge-passive-bosimao-train-nomask-RGB                         # 国内人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1.0
+- name: Chinese_edge-dingzhihua-w4k-train-mianbanji-RGB-nomask-darkroom-v1.0      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Chinese_edge-dingzhihua-w4k-train-mianbanji-RGB-nomask-darkroom-v1.1      # 国内人种
+  sample_method: sampler_uniform_person_bq
+  weight: 1.0
+- name: Foreigners_Koala-real-baijiMS-B0-RGB-female      # 海外人种Foreigners
+  sample_method: sampler_uniform_person_qq
+  weight: 0.1
+- name: Foreigners_Koala-real-baijiMS-B1-RGB-female      # 海外人种Foreigners
+  sample_method: sampler_uniform_person_qq
+  weight: 0.1
+- name: Foreigners_Koala-real-baijiMS-B2-RGB-female      # 海外人种Foreigners
+  sample_method: sampler_uniform_person_qq
+  weight: 0.1
+- name: Foreigners_Koala-mainA-frombase-batch0-female    # 海外人种Foreigners
+  sample_method: sampler_uniform_person_qq
+  weight: 1
+- name: Foreigners_Koala-mainA-frombase-batch1-female    # 海外人种Foreigners
+  sample_method: sampler_uniform_person_qq
+  weight: 1
+- name: Foreigners_Koala-mainA-batch0-female             # 海外人种Foreigners
+  sample_method: sampler_uniform_person_qq
+  weight: 1
+- name: Chinese_douyin_makeup                         # 国内人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1
+- name: Chinese_huoshan_makeup                          # 国内人种
+  sample_method: sampler_uniform_person_qq
+  weight: 1
+

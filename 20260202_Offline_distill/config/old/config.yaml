@@ -1,0 +1,52 @@
+feat_dim: 256
+lr_info:
+    lr: 0.1
+    lr_func: 'lr_cosine'
+weight_decay: 0.0001
+optimizer:
+    type: 'SGD'
+    params:
+        momentum: 0.9
+clip_grad:
+    clip: True
+    max_norm: 2.0
+cls_batch_size: 256
+fp16: True
+num_batch_per_epoch: 1000
+max_epoch: 500
+
+gpu_per_machine: 8
+nodes: 1
+local_data: False #False 使用本地数据
+checkpoint_interval: 10
+
+batch_size: 2048
+input_size: [128, 128]
+output_prefix: 's3://jiigan-faceid/wjw/rec/weights/vivo_wjw_test_7'
+
+# pretrained_path: "/data/jg-face-unlock-ppl/base/fea/ipc_mt7.13_train_new.pth"
+
+l2_loss:
+    cos_weight: 1.0
+    l2_weight: 1.0
+
+sampler_pipe_name:  'txy_sampler_vivo_test'
+provider_pipe_name: 'txy_provider_vivo_test'
+
+sampler_batch_size: 256
+ddp_real: True
+dp_image_size: [128, 128]
+
+datasets:
+    dataset_collection: '/data/jg-face-unlock-ppl/base/fea/0821_wjw_vivo_pretrain_resnet_s3_disttill/config/data_list_test.yaml'
+    
+    datasets: 
+    - name: 'cls'
+      path: '/data/jg-face-unlock-ppl/base/fea/0821_wjw_vivo_pretrain_resnet_s3_disttill/config/cls_test.yaml'
+      imgs: 1
+     
+teachers:
+    - name: 'aries'
+      model_path: 's3://wangjingwen/data/ipc_mt7.13.inf.pt'
+      input_size: [128, 128] 
+
