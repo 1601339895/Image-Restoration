@@ -1,4 +1,3 @@
-import pdb
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -235,15 +234,10 @@ class Degradation_Aware_Module(nn.Module):
 
         return layer_prompts, global_feat
 
-class CAFGB(nn.Module):
+class CGDM(nn.Module):
     """
-    Context-Aware Frequency Gating (CAFG)
-    改进点:
-    1. 移除固定的高斯高低频分割，改为全频段处理。
-    2. 引入 Context-Aware Frequency Gating (CAFG)，利用 context_emb 动态生成频域权值。
-    3. 增强了频域和空域的交互机制。
+    Context-Gated Dual-Domain Modulation (CGDM)
     """
-
     def __init__(self, dim, context_dim=64):
         super().__init__()
         self.dim = dim
@@ -340,125 +334,112 @@ class GDFN(nn.Module):
         return x
 
 
-class Context_Gated_Attention(nn.Module):
-    """
-    Context_Gated_Attention (CGA)
-
-    Refined for CVPR/ICCV:
-    1. Intra-Attention Modulation: Instead of modulating the input, we modulate the internal components (Temperature & Value).
-    2. Context-Gated Value: Dynamically suppresses noise-dominant channels in 'V' before aggregation.
-    3. Adaptive Sharpness: Controls the entropy of the attention map via context-adaptive temperature.
-    """
+class Context_Adaptive_Gated_Attention(nn.Module):
 
     def __init__(self, dim, num_heads, bias, context_dim):
-        super(Context_Gated_Attention, self).__init__()
-        self.num_heads = num_heads
+        super().__init__()
         self.dim = dim
-        head_dim = dim // num_heads
-        self.scale = head_dim ** -0.5
+        self.num_heads = num_heads
+        self.head_dim = dim // num_heads
 
-        # --- 1. Standard Attention Components ---
+        # -------------------------------
+        # QKV projections
+        # -------------------------------
         self.qkv = nn.Conv2d(dim, dim * 3, kernel_size=1, bias=bias)
-        self.qkv_dwconv = nn.Conv2d(dim * 3, dim * 3, kernel_size=3, stride=1, padding=1, groups=dim * 3, bias=bias)
+        self.qkv_dwconv = nn.Conv2d(dim * 3, dim * 3, kernel_size=3, padding=1, groups=dim * 3, bias=bias)
         self.project_out = nn.Conv2d(dim, dim, kernel_size=1, bias=bias)
 
-        # Learnable base temperature (parameter)
-        self.base_temperature = nn.Parameter(torch.ones(num_heads, 1, 1))
+        # -------------------------------
+        # 1. Context-Adaptive Temperature (log-space)
+        # -------------------------------
+        # Base temperature per head (log domain)
+        self.log_base_temperature = nn.Parameter(torch.zeros(num_heads, 1, 1))
 
-        # --- 2. Context Adapter (The "Reshaping" Part) ---
-        # 生成动态温度缩放因子 (Scalar per head)
+        # Context -> delta log temperature
         self.temp_adapter = nn.Sequential(
             nn.Linear(context_dim, dim // 4),
             nn.ReLU(inplace=True),
             nn.Linear(dim // 4, num_heads)
         )
 
-        # 生成 Value 门控权重 (Channel-wise Vector)
-        # 这是一个 "Feature Selection" 步骤
-        self.value_gate_adapter = nn.Sequential(
+        # -------------------------------
+        # 2. Element-wise Attention Output Gate 
+        # -------------------------------
+        # Context -> per-head, per-channel gate
+        # Output dimension: [B, num_heads * head_dim]
+        self.attn_output_gate = nn.Sequential(
             nn.Linear(context_dim, dim),
-            nn.Sigmoid()  # 输出 0~1 的门控值
         )
 
-        # --- 3. Local Branch ---
-        # 保持并行局部路径，保留纹理细节
-        self.local_mixer = nn.Conv2d(dim, dim, kernel_size=3, padding=1, groups=dim, bias=bias)
-
-    def forward(self, x, context_emb):
+    def forward(self, x, context_emb, return_internals=False):
+        """
+        x:           [B, C, H, W]
+        context_emb: [B, context_dim]
+        return_internals: If True, return (out, attn, total_temp, gate_score)
+        """
         b, c, h, w = x.shape
 
-        # -----------------------------------------------------------
-        # Step 1: Generate Context Dynamics (Before expensive Attn)
-        # -----------------------------------------------------------
+        # -------------------------------------------------------
+        # Step 1: Context → Temperature & Output Gate
+        # -------------------------------------------------------
 
-        # A. Dynamic Temperature Factor
-        # context_emb: [B, ctx_dim] -> temp_factor: [B, heads, 1, 1]
-        temp_factor = self.temp_adapter(context_emb).view(b, self.num_heads, 1, 1)
-        # 使用 Sigmoid*2 + 0.5 保证温度在 [0.5, 2.5] 之间浮动，避免极端值
-        temp_factor = torch.sigmoid(temp_factor) * 2.0 + 0.5
+        # Log-space temperature (per head)
+        log_delta = self.temp_adapter(context_emb).view(b, self.num_heads, 1, 1)
+        log_temp = self.log_base_temperature + log_delta
+        total_temp = torch.exp(log_temp)  # [B, heads, 1, 1]
 
-        # B. Value Gating Mask
-        # context_emb: [B, ctx_dim] -> v_gate: [B, 1, C, 1] (formatted for MDTA)
-        # 我们需要将其 reshape 以匹配 MDTA 的 [B, Heads, C_head, N] 格式中的 C 维度
-        v_gate = self.value_gate_adapter(context_emb)  # [B, C]
-        v_gate = v_gate.view(b, self.num_heads, c // self.num_heads, 1)
+        # Element-wise output gate (per head, per channel)
+        gate_score = self.attn_output_gate(context_emb)              # [B, C]
+        gate_score = gate_score.view(b, self.num_heads, self.head_dim, 1)  # [B, heads, C_head, 1]
+        gate_score = torch.sigmoid(gate_score)
 
-        # -----------------------------------------------------------
-        # Step 2: QKV Projection & Reshape
-        # -----------------------------------------------------------
+        # -------------------------------------------------------
+        # Step 2: QKV Projection
+        # -------------------------------------------------------
         qkv = self.qkv_dwconv(self.qkv(x))
         q, k, v = qkv.chunk(3, dim=1)
 
-        # Reshape for MDTA (Transposed Attention / Channel Attention)
-        # Shape: [B, Heads, C_head, HW]
+        # Reshape: [B, heads, C_head, HW]
         q = rearrange(q, 'b (head c) h w -> b head c (h w)', head=self.num_heads)
         k = rearrange(k, 'b (head c) h w -> b head c (h w)', head=self.num_heads)
-        v_unfold = rearrange(v, 'b (head c) h w -> b head c (h w)', head=self.num_heads)
+        v = rearrange(v, 'b (head c) h w -> b head c (h w)', head=self.num_heads)
 
-        # Normalize Q, K for stable training
+        # L2 normalize Q, K for stability
         q = F.normalize(q, dim=-1)
         k = F.normalize(k, dim=-1)
 
-        # -----------------------------------------------------------
-        # Step 3: Context-Guided Aggregation
-        # -----------------------------------------------------------
+        # -------------------------------------------------------
+        # Step 3: Context-Adaptive  Dot-Product Attention
+        # -------------------------------------------------------
+        attn = (q @ k.transpose(-2, -1)) 
+        attn = attn * total_temp
+        attn = attn.softmax(dim=-1)
 
-        # --- A. Dynamic Temperature Attention Map ---
-        # Attn = Softmax( (Q @ K.T) * Base_Temp * Context_Factor )
-        attn = (q @ k.transpose(-2, -1)) * self.scale
+        out = (attn @ v)  # [B, heads, C_head, HW]
 
-        # 注入 Context 调节的温度
-        # 这里的物理意义：对于浓雾（低频），Temperature 变小，Attention 变平滑（平均）；
-        # 对于雨点（高频），Temperature 变大，Attention 变锐利（聚焦）。
-        total_temp = self.base_temperature * temp_factor
-        attn = (attn * total_temp).softmax(dim=-1)
+        # -------------------------------------------------------
+        # Step 4: Element-wise Gated Attention Output
+        # -------------------------------------------------------
+        out = out * gate_score
 
-        # --- B. Context-Gated Value Modulation (New!) ---
-        # 在聚合之前，利用 Context "清洗" V
-        # 物理意义：如果 Context 识别出当前通道主要是噪声，v_gate 会接近 0，
-        # 从而防止噪声被 Global Attention 广播到全图。
-        v_unfold = v_unfold * v_gate
+        # -------------------------------------------------------
+        # Step 5: Merge Heads & Output Projection
+        # -------------------------------------------------------
+        out = rearrange(out, 'b head c (h w) -> b (head c) h w', h=h, w=w)
+        out = self.project_out(out)
 
-        # Global Aggregation
-        out_global = (attn @ v_unfold)
-        out_global = rearrange(out_global, 'b head c (h w) -> b (head c) h w', head=self.num_heads, h=h, w=w)
-
-        # -----------------------------------------------------------
-        # Step 4: Local Fusion
-        # -----------------------------------------------------------
-        out_local = self.local_mixer(v)
-
-        # 最终融合
-        out = self.project_out(out_global + out_local)
-
+        if return_internals:
+            return out, attn, total_temp, gate_score
         return out
 
-
 class Context_Gate_TransformerBlock(nn.Module):
+    """
+    CGTB:
+    """
     def __init__(self, dim, num_heads, ffn_expansion_factor, bias, LayerNorm_type, context_dim):
         super(Context_Gate_TransformerBlock, self).__init__()
         self.norm1 = LayerNorm(dim, LayerNorm_type)
-        self.attn = Context_Gated_Attention(dim, num_heads, bias, context_dim)
+        self.attn = Context_Adaptive_Gated_Attention(dim, num_heads, bias, context_dim)
         self.norm2 = LayerNorm(dim, LayerNorm_type)
         self.ffn = GDFN(dim, ffn_expansion_factor, bias)
 
@@ -475,7 +456,10 @@ class Context_Gate_TransformerBlock(nn.Module):
         return x
 
 
-class Context_Gated_IR(nn.Module):
+class DACG_IR(nn.Module):
+    """
+    Degradation Aware Context Gate Image Restoration
+    """
     def __init__(self,
                  inp_channels=3,
                  out_channels=3,
@@ -532,7 +516,7 @@ class Context_Gated_IR(nn.Module):
         ])
 
         # 瓶颈层 Fusion
-        # self.freq_fusion = CAFGB(dim=self.dim_list[3], context_dim=context_dim)
+        self.freq_fusion = CGDM(dim=self.dim_list[3], context_dim=context_dim)
 
         self.up4_3 = Upsample(self.dim_list[3])
         self.skip_fusion3 = Adaptive_Gated_Fusion(in_dim=self.dim_list[2])
@@ -600,9 +584,8 @@ class Context_Gated_IR(nn.Module):
         for block in self.latent:
             latent = block(latent, p4)
 
-        # pdb.set_trace()
         # Bottleneck Fusion
-        # latent = self.freq_fusion(latent, global_feat)  # 不使用
+        latent = self.freq_fusion(latent, global_feat)
 
         # 4. Decoder with Gated Skip Connections
 
@@ -656,8 +639,8 @@ if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
 
-    model = Context_Gated_IR(
-        dim=48,
+    model = DACG_IR(
+        dim=32,
         num_blocks=[4, 6, 6, 8],
         num_refinement_blocks=4,
         heads=[1, 2, 4, 8],
@@ -684,3 +667,4 @@ if __name__ == "__main__":
     # 简单显存测试
     if torch.cuda.is_available():
         print(f"GPU Memory: {torch.cuda.max_memory_allocated(device) / 1024 ** 2:.2f} MB")
+ 
